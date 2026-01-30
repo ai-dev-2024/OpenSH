@@ -1,0 +1,35 @@
+# OpenSH
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+.venv/
+ENV/
+
+# Environment variables / API keys
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Build
+dist/
+build/
+*.egg-info/
+
+# Terabox sync files
+*.terabox.uploading.cfg
+
+# Old nlsh files (kept for reference during development)
+nlsh.py
