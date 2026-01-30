@@ -8,9 +8,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned
+- Full Google OAuth browser-based authentication
 - Auto-execute mode (`-y` flag)
 - Command aliases
 - Customizable AI model selection
+
+---
+
+## [0.0.2] - 2026-01-30
+
+### Added
+- **Authentication menu** - Choose between API key and Google OAuth (API key works now, OAuth coming soon)
+- **google-auth-oauthlib** dependency for future OAuth support
+- **Improved first-run experience** with cleaner setup flow
+
+### Security
+- Added `.auth_method`, `.google_creds.pickle`, and `client_secret.json` to `.gitignore`
+- Credentials are never committed to the repository
 
 ---
 
@@ -43,9 +57,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date | Description |
 |---------|------|-------------|
+| 0.0.2 | 2026-01-30 | Authentication improvements, OAuth prep |
 | 0.0.1 | 2026-01-30 | Initial release with multi-platform support |
 
 ---
 
-[Unreleased]: https://github.com/ai-dev-2024/OpenSH/compare/v0.0.1...HEAD
+[Unreleased]: https://github.com/ai-dev-2024/OpenSH/compare/v0.0.2...HEAD
+[0.0.2]: https://github.com/ai-dev-2024/OpenSH/releases/tag/v0.0.2
 [0.0.1]: https://github.com/ai-dev-2024/OpenSH/releases/tag/v0.0.1

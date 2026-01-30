@@ -8,7 +8,7 @@ Based on nlsh (https://github.com/junaid-mahmood/nlsh) by Junaid Mahmood
 Support: https://ko-fi.com/ai_dev_2024
 """
 
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 
 import signal
 import os
@@ -82,15 +82,91 @@ def save_api_key(api_key: str):
     with open(env_path, "w") as f:
         f.write(f"GEMINI_API_KEY={api_key}\n")
 
+def save_auth_method(method: str):
+    """Save the authentication method used."""
+    auth_file = script_dir / ".auth_method"
+    with open(auth_file, "w") as f:
+        f.write(method)
+
+def get_auth_method() -> str:
+    """Get the saved authentication method."""
+    auth_file = script_dir / ".auth_method"
+    if auth_file.exists():
+        return auth_file.read_text().strip()
+    return "api_key"
+
+def setup_google_oauth():
+    """Set up authentication via Google OAuth (browser-based)."""
+    try:
+        from google_auth_oauthlib.flow import InstalledAppFlow
+        from google.auth.transport.requests import Request
+        import pickle
+        
+        # OAuth scopes needed for Gemini API
+        SCOPES = ['https://www.googleapis.com/auth/generative-language']
+        
+        creds_file = script_dir / ".google_creds.pickle"
+        creds = None
+        
+        if creds_file.exists():
+            with open(creds_file, 'rb') as f:
+                creds = pickle.load(f)
+        
+        if not creds or not creds.valid:
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+            else:
+                # Need to create OAuth client credentials first
+                print("\n\033[33mGoogle OAuth requires a client_secret.json file.\033[0m")
+                print("For now, please use an API key instead.")
+                print("\033[36mGet your free key at: https://aistudio.google.com/apikey\033[0m\n")
+                return None
+            
+            with open(creds_file, 'wb') as f:
+                pickle.dump(creds, f)
+        
+        save_auth_method("oauth")
+        return creds
+        
+    except ImportError:
+        print("\033[31mOAuth libraries not installed. Using API key instead.\033[0m")
+        return None
+    except Exception as e:
+        print(f"\033[31mOAuth setup failed: {e}\033[0m")
+        return None
+
 def setup_api_key():
-    print(f"\n\033[36mGet your free key at: https://aistudio.google.com/apikey\033[0m\n")
+    """Set up authentication via API key."""
+    print(f"\n\033[36mGet your free key at: https://aistudio.google.com/apikey\033[0m")
+    print("\033[90m(Takes ~30 seconds to create)\033[0m\n")
     api_key = input("\033[33mEnter your Gemini API key:\033[0m ").strip()
     if not api_key:
         print("No API key provided.")
         sys.exit(1)
     save_api_key(api_key)
+    save_auth_method("api_key")
     os.environ["GEMINI_API_KEY"] = api_key
     print("\033[32m✓ API key saved!\033[0m\n")
+
+def setup_authentication():
+    """Interactive authentication setup."""
+    print("\n\033[1m🔐 OpenSH Authentication Setup\033[0m\n")
+    print("Choose authentication method:")
+    print("  \033[36m1\033[0m. API Key (recommended - quick & easy)")
+    print("  \033[36m2\033[0m. Google Account (OAuth - coming soon)")
+    print()
+    
+    choice = input("\033[33mEnter choice [1]:\033[0m ").strip() or "1"
+    
+    if choice == "2":
+        creds = setup_google_oauth()
+        if creds:
+            return {"credentials": creds}
+        # Fall back to API key if OAuth fails
+        print("\nFalling back to API key authentication...\n")
+    
+    setup_api_key()
+    return {"api_key": os.getenv("GEMINI_API_KEY")}
 
 def show_help():
     print("\033[36m!api\033[0m       - Change API key")
@@ -132,13 +208,18 @@ load_env()
 
 first_run = not os.getenv("GEMINI_API_KEY")
 if first_run:
-    setup_api_key()
+    auth_config = setup_authentication()
     print("\033[1mOpenSH\033[0m - talk to your terminal\n")
     show_help()
 
 from google import genai
 
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+# Initialize client with appropriate authentication
+if os.getenv("GEMINI_API_KEY"):
+    client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+else:
+    print("\033[31mNo authentication configured. Run !api to set up.\033[0m")
+    sys.exit(1)
 
 command_history = []
 MAX_HISTORY = 10

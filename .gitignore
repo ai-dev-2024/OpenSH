@@ -11,6 +11,9 @@ ENV/
 
 # Environment variables / API keys
 .env
+.auth_method
+.google_creds.pickle
+client_secret.json
 
 # IDE
 .idea/
