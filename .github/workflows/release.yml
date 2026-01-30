@@ -1,0 +1,120 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 0.2.0)'
+        required: true
+
+jobs:
+  build-and-release:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            artifact_name: opsh-windows
+            install_script: install.ps1
+          - os: ubuntu-latest
+            artifact_name: opsh-linux
+            install_script: install.sh
+          - os: macos-latest
+            artifact_name: opsh-macos
+            install_script: install.sh
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+
+      - name: Create standalone executable (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          pyinstaller --onefile --name opsh opsh.py
+          mkdir -p dist/opsh-windows
+          cp dist/opsh.exe dist/opsh-windows/
+          cp install.ps1 dist/opsh-windows/
+          cp uninstall.ps1 dist/opsh-windows/
+          cp README.md dist/opsh-windows/
+
+      - name: Create standalone executable (Linux/macOS)
+        if: matrix.os != 'windows-latest'
+        run: |
+          pyinstaller --onefile --name opsh opsh.py
+          mkdir -p dist/${{ matrix.artifact_name }}
+          cp dist/opsh dist/${{ matrix.artifact_name }}/
+          cp install.sh dist/${{ matrix.artifact_name }}/
+          cp uninstall.sh dist/${{ matrix.artifact_name }}/
+          cp README.md dist/${{ matrix.artifact_name }}/
+          chmod +x dist/${{ matrix.artifact_name }}/opsh
+          chmod +x dist/${{ matrix.artifact_name }}/install.sh
+
+      - name: Create archive (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          Compress-Archive -Path dist/opsh-windows/* -DestinationPath opsh-windows.zip
+
+      - name: Create archive (Linux/macOS)
+        if: matrix.os != 'windows-latest'
+        run: |
+          cd dist && tar -czvf ../${{ matrix.artifact_name }}.tar.gz ${{ matrix.artifact_name }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: |
+            opsh-windows.zip
+            opsh-linux.tar.gz
+            opsh-macos.tar.gz
+
+  create-release:
+    name: Create GitHub Release
+    needs: build-and-release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Get version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: OpenSH v${{ steps.version.outputs.version }}
+          tag_name: v${{ steps.version.outputs.version }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            artifacts/opsh-windows/*.zip
+            artifacts/opsh-linux/*.tar.gz
+            artifacts/opsh-macos/*.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

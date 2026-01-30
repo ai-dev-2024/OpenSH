@@ -103,21 +103,61 @@ if ($userPath -notlike "*$INSTALL_DIR*") {
     $env:PATH = "$INSTALL_DIR;$env:PATH"
 }
 
-# Optionally add to PowerShell profile for auto-start
-$profilePath = $PROFILE.CurrentUserAllHosts
-$autoStartLine = "# OpenSH auto-start (remove to disable)`nif (Test-Path `"$launcherPath`") { & `"$launcherPath`" }"
-
+# Ask about auto-start in new terminals
 Write-Host ""
 Write-Host "================================================" -ForegroundColor Green
 Write-Host "  OpenSH installed successfully!" -ForegroundColor Green
 Write-Host "================================================" -ForegroundColor Green
 Write-Host ""
-Write-Host "To start using OpenSH:" -ForegroundColor Cyan
-Write-Host "  1. Open a NEW PowerShell/Terminal window" -ForegroundColor White
-Write-Host "  2. Type: opsh" -ForegroundColor Yellow
+
+$profilePath = $PROFILE.CurrentUserAllHosts
+$autoStartMarker = "# OpenSH auto-start"
+
+# Check if auto-start already configured
+$hasAutoStart = $false
+if (Test-Path $profilePath) {
+    $profileContent = Get-Content $profilePath -Raw -ErrorAction SilentlyContinue
+    if ($profileContent -and $profileContent -match "OpenSH auto-start") {
+        $hasAutoStart = $true
+    }
+}
+
+if (-not $hasAutoStart) {
+    Write-Host "Would you like OpenSH to start automatically in every new terminal?" -ForegroundColor Cyan
+    Write-Host "(You can exit anytime with 'exit' or Ctrl+C to use normal PowerShell)" -ForegroundColor Gray
+    Write-Host ""
+    $response = Read-Host "Enable auto-start? [Y/n]"
+    
+    if ($response -ne "n" -and $response -ne "N") {
+        # Create profile directory if needed
+        $profileDir = Split-Path $profilePath -Parent
+        if (-not (Test-Path $profileDir)) {
+            New-Item -ItemType Directory -Path $profileDir -Force | Out-Null
+        }
+        
+        # Add auto-start to profile
+        $autoStartCode = @"
+
+# OpenSH auto-start (remove these lines to disable)
+if (Test-Path "$launcherPath") { & "$launcherPath" }
+"@
+        Add-Content -Path $profilePath -Value $autoStartCode
+        Write-Host ""
+        Write-Host "Auto-start enabled! Every new terminal will start in OpenSH mode." -ForegroundColor Green
+        Write-Host "To disable later, edit: $profilePath" -ForegroundColor Gray
+    }
+    else {
+        Write-Host ""
+        Write-Host "Auto-start skipped. Type 'opsh' to start OpenSH manually." -ForegroundColor Yellow
+    }
+}
+else {
+    Write-Host "Auto-start already configured." -ForegroundColor Gray
+}
+
 Write-Host ""
-Write-Host "Or run it now:" -ForegroundColor Cyan
-Write-Host "  & `"$launcherPath`"" -ForegroundColor Yellow
+Write-Host "To start using OpenSH now:" -ForegroundColor Cyan
+Write-Host "  opsh" -ForegroundColor Yellow
 Write-Host ""
 Write-Host "Based on nlsh by Junaid Mahmood" -ForegroundColor DarkGray
 Write-Host "Support: https://ko-fi.com/ai_dev_2024" -ForegroundColor DarkGray

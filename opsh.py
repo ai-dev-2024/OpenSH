@@ -8,7 +8,7 @@ Based on nlsh (https://github.com/junaid-mahmood/nlsh) by Junaid Mahmood
 Support: https://ko-fi.com/ai_dev_2024
 """
 
-__version__ = "0.1.1"
+__version__ = "0.2.0"
 
 import signal
 import os
@@ -17,6 +17,10 @@ import subprocess
 import platform
 import json
 import webbrowser
+import argparse
+import time
+import urllib.request
+import urllib.error
 from pathlib import Path
 from datetime import datetime
 
@@ -93,165 +97,158 @@ def load_env():
                     key, value = line.split("=", 1)
                     os.environ[key] = value
 
-def save_api_key(api_key: str):
+def save_api_key(provider: str, api_key: str):
+    """Save API key to .env file."""
+    env_vars = {}
+    if env_path.exists():
+        with open(env_path) as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    key, value = line.split("=", 1)
+                    env_vars[key] = value
+    
+    if provider == "groq":
+        env_vars["GROQ_API_KEY"] = api_key
+    else:
+        env_vars["GEMINI_API_KEY"] = api_key
+    
     with open(env_path, "w") as f:
-        f.write(f"GEMINI_API_KEY={api_key}\n")
+        for key, value in env_vars.items():
+            f.write(f"{key}={value}\n")
 
-def google_oauth_login():
-    """
-    Authenticate using Google OAuth via browser.
-    Opens Google Cloud auth page, user signs in, grants permission.
-    Returns credentials object on success, None on failure.
-    """
-    try:
-        from google_auth_oauthlib.flow import InstalledAppFlow
-        from google.auth.transport.requests import Request
-        import pickle
-        
-        creds_file = script_dir / ".google_creds.pickle"
-        creds = None
-        
-        # Check for existing credentials
-        if creds_file.exists():
-            with open(creds_file, 'rb') as f:
-                creds = pickle.load(f)
-        
-        # If credentials are valid, use them
-        if creds and creds.valid:
-            print("\033[32m✓ Using saved Google credentials\033[0m")
-            return creds
-        
-        # Try to refresh expired credentials
-        if creds and creds.expired and creds.refresh_token:
-            try:
-                creds.refresh(Request())
-                with open(creds_file, 'wb') as f:
-                    pickle.dump(creds, f)
-                print("\033[32m✓ Refreshed Google credentials\033[0m")
-                return creds
-            except Exception:
-                pass  # Will do full auth below
-        
-        # Need fresh OAuth - use Google AI Studio's OAuth
-        print("\n\033[36m🌐 Opening Google Sign-in in your browser...\033[0m")
-        print("\033[90m(If browser doesn't open, visit the URL shown)\033[0m\n")
-        
-        # Google AI's OAuth client ID (public, for AI Studio)
-        # This allows users to authenticate with their Google account
-        client_config = {
-            "installed": {
-                "client_id": "764086051850-6qr4p6gpi6hn506pt8ejuq83di341hur.apps.googleusercontent.com",
-                "client_secret": "d-FL95Q19q7MQmFpd7hHD0Ty",
-                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                "token_uri": "https://oauth2.googleapis.com/token",
-                "redirect_uris": ["http://localhost", "urn:ietf:wg:oauth:2.0:oob"]
-            }
-        }
-        
-        # Scopes needed for Gemini API
-        SCOPES = [
-            'https://www.googleapis.com/auth/generative-language.retriever',
-            'https://www.googleapis.com/auth/cloud-platform'
-        ]
-        
-        flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
-        
-        # This opens browser and waits for user to complete sign-in
-        creds = flow.run_local_server(
-            port=0,  # Random available port
-            prompt='consent',
-            success_message='✅ OpenSH authenticated! You can close this tab.'
-        )
-        
-        # Save credentials for future use
-        with open(creds_file, 'wb') as f:
-            pickle.dump(creds, f)
-        
-        print("\033[32m✓ Successfully signed in with Google!\033[0m\n")
-        return creds
-        
-    except ImportError as e:
-        print(f"\033[31mOAuth libraries not available: {e}\033[0m")
-        print("Install with: pip install google-auth-oauthlib")
-        return None
-    except Exception as e:
-        print(f"\033[31mGoogle sign-in failed: {e}\033[0m")
-        return None
-
-def setup_api_key():
-    """Set up authentication via manual API key entry."""
-    print(f"\n\033[36mGet your free key at: https://aistudio.google.com/apikey\033[0m")
-    print("\033[90m(Takes ~30 seconds to create)\033[0m\n")
-    api_key = input("\033[33mPaste your Gemini API key:\033[0m ").strip()
+def setup_authentication():
+    """Interactive authentication setup."""
+    print("\n\033[1m🔐 OpenSH Setup\033[0m\n")
+    print("Choose your AI provider:\n")
+    print("  \033[36m1. Groq\033[0m (Recommended - Fast, reliable, 30 req/min)")
+    print("  \033[90m2. Gemini\033[0m (Google AI - 15 req/min)")
+    print()
+    
+    choice = input("\033[33mSelect provider [1/2]:\033[0m ").strip()
+    
+    if choice == "2":
+        provider = "gemini"
+        print("\n\033[36m→ Get your free key at: https://aistudio.google.com/apikey\033[0m")
+        print("\033[90m  (Takes ~30 seconds - just click 'Create API Key')\033[0m\n")
+        open_browser = input("\033[33mOpen in browser? [Y/n]:\033[0m ").strip().lower()
+        if open_browser != 'n':
+            webbrowser.open("https://aistudio.google.com/apikey")
+            print("\n\033[90mBrowser opened. Copy your API key and paste it below.\033[0m\n")
+    else:
+        provider = "groq"
+        print("\n\033[36m→ Get your free key at: https://console.groq.com/keys\033[0m")
+        print("\033[90m  (Sign up with Google/GitHub, create API key)\033[0m\n")
+        open_browser = input("\033[33mOpen in browser? [Y/n]:\033[0m ").strip().lower()
+        if open_browser != 'n':
+            webbrowser.open("https://console.groq.com/keys")
+            print("\n\033[90mBrowser opened. Copy your API key and paste it below.\033[0m\n")
+    
+    api_key = input(f"\033[33mPaste your {provider.title()} API key:\033[0m ").strip()
     if not api_key:
         print("No API key provided.")
         return None
-    save_api_key(api_key)
-    os.environ["GEMINI_API_KEY"] = api_key
+    
+    save_api_key(provider, api_key)
+    os.environ[f"{provider.upper()}_API_KEY"] = api_key
     
     # Save config
     config = load_config()
+    config["provider"] = provider
     config["auth_method"] = "api_key"
     save_config(config)
     
-    print("\033[32m✓ API key saved!\033[0m\n")
-    return api_key
+    print(f"\033[32m✓ {provider.title()} API key saved!\033[0m\n")
+    return {"provider": provider, "api_key": api_key}
 
-def setup_authentication():
-    """Interactive authentication setup - API key based."""
-    print("\n\033[1m🔐 OpenSH Setup\033[0m\n")
-    print("OpenSH uses Google's Gemini AI to understand your requests.")
-    print("You need a \033[1mfree\033[0m API key from Google AI Studio.\n")
-    print("\033[36m→ Get your key at: https://aistudio.google.com/apikey\033[0m")
-    print("\033[90m  (Takes ~30 seconds - just click 'Create API Key')\033[0m\n")
+def call_groq(prompt: str, api_key: str) -> str:
+    """Call Groq API directly using urllib (no external dependencies)."""
+    url = "https://api.groq.com/openai/v1/chat/completions"
     
-    # Open browser to make it even easier
-    open_browser = input("\033[33mOpen Google AI Studio in browser? [Y/n]:\033[0m ").strip().lower()
-    if open_browser != 'n':
-        import webbrowser
-        webbrowser.open("https://aistudio.google.com/apikey")
-        print("\n\033[90mBrowser opened. Copy your API key and paste it below.\033[0m\n")
+    data = json.dumps({
+        "model": "llama-3.3-70b-versatile",
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.1,
+        "max_tokens": 500
+    }).encode('utf-8')
     
-    api_key = setup_api_key()
-    if api_key:
-        return {"api_key": api_key}
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+        "User-Agent": "OpenSH/0.2.0"
+    }
     
-    return None
+    req = urllib.request.Request(url, data=data, headers=headers, method='POST')
+    
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            with urllib.request.urlopen(req, timeout=30) as response:
+                result = json.loads(response.read().decode('utf-8'))
+                return result["choices"][0]["message"]["content"].strip()
+        except urllib.error.HTTPError as e:
+            if e.code == 429:
+                if attempt < max_retries - 1:
+                    wait_time = (attempt + 1) * 2
+                    print(f"\033[90mRate limit - waiting {wait_time}s...\033[0m")
+                    time.sleep(wait_time)
+                    continue
+                raise Exception("Rate limit - please wait a moment")
+            else:
+                error_body = e.read().decode('utf-8') if e.fp else str(e)
+                raise Exception(f"API error {e.code}: {error_body[:100]}")
+        except urllib.error.URLError as e:
+            raise Exception(f"Network error: {e.reason}")
 
-def get_client():
-    """Get the Gemini client with appropriate authentication."""
-    from google import genai
+def call_gemini(prompt: str, api_key: str) -> str:
+    """Call Gemini API directly using urllib."""
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}"
     
+    data = json.dumps({
+        "contents": [{"parts": [{"text": prompt}]}]
+    }).encode('utf-8')
+    
+    headers = {"Content-Type": "application/json", "User-Agent": "OpenSH/0.2.0"}
+    req = urllib.request.Request(url, data=data, headers=headers, method='POST')
+    
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            with urllib.request.urlopen(req, timeout=30) as response:
+                result = json.loads(response.read().decode('utf-8'))
+                return result["candidates"][0]["content"]["parts"][0]["text"].strip()
+        except urllib.error.HTTPError as e:
+            if e.code == 429:
+                if attempt < max_retries - 1:
+                    wait_time = (attempt + 1) * 2
+                    print(f"\033[90mRate limit - waiting {wait_time}s...\033[0m")
+                    time.sleep(wait_time)
+                    continue
+                raise Exception("Rate limit - please wait a moment")
+            else:
+                error_body = e.read().decode('utf-8') if e.fp else str(e)
+                raise Exception(f"API error {e.code}: {error_body[:100]}")
+        except urllib.error.URLError as e:
+            raise Exception(f"Network error: {e.reason}")
+
+def get_ai_response(prompt: str) -> str:
+    """Get AI response using configured provider."""
     config = load_config()
-    auth_method = config.get("auth_method", "")
+    provider = config.get("provider", "groq")
     
-    # Try OAuth credentials first
-    if auth_method == "oauth":
-        creds_file = script_dir / ".google_creds.pickle"
-        if creds_file.exists():
-            import pickle
-            from google.auth.transport.requests import Request
-            
-            with open(creds_file, 'rb') as f:
-                creds = pickle.load(f)
-            
-            if creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-                with open(creds_file, 'wb') as f:
-                    pickle.dump(creds, f)
-            
-            if creds.valid:
-                return genai.Client(credentials=creds)
-    
-    # Fall back to API key
-    api_key = os.getenv("GEMINI_API_KEY")
-    if api_key:
-        return genai.Client(api_key=api_key)
-    
-    return None
+    if provider == "gemini":
+        api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            raise Exception("No Gemini API key - run !auth")
+        return call_gemini(prompt, api_key)
+    else:
+        api_key = os.getenv("GROQ_API_KEY")
+        if not api_key:
+            raise Exception("No Groq API key - run !auth")
+        return call_groq(prompt, api_key)
 
 def show_help():
-    print("\033[36m!auth\033[0m      - Change authentication method")
+    print("\033[36m!auth\033[0m      - Change API provider/key")
     print("\033[36m!version\033[0m   - Show version info")
     print("\033[36m!credits\033[0m   - Show credits")
     print("\033[36m!uninstall\033[0m - Remove OpenSH")
@@ -263,10 +260,10 @@ def show_help():
 
 def show_version():
     config = load_config()
-    auth_method = config.get("auth_method", "not configured")
+    provider = config.get("provider", "not configured")
     print(f"\n\033[1mOpenSH\033[0m v{__version__}")
     print(f"Platform: {PLATFORM['name']} ({PLATFORM['shell']})")
-    print(f"Auth: {auth_method}")
+    print(f"Provider: {provider}")
     print(f"Python: {platform.python_version()}")
     print(f"GitHub: https://github.com/ai-dev-2024/OpenSH")
     print()
@@ -324,8 +321,33 @@ def format_history() -> str:
                 lines.append(f"   {line}")
     return "\n".join(lines)
 
-def get_command(client, user_input: str, cwd: str) -> str:
+def get_file_context(cwd: str) -> str:
+    """Get current directory and desktop file listings for AI context."""
+    context_parts = []
+    
+    # Current directory listing (top 20 items)
+    try:
+        items = os.listdir(cwd)[:20]
+        if items:
+            context_parts.append(f"Files in current directory ({cwd}):\n" + "\n".join(f"  {item}" for item in items))
+    except:
+        pass
+    
+    # Desktop listing if not already in desktop
+    desktop_path = Path.home() / "Desktop"
+    if desktop_path.exists() and str(desktop_path) != cwd:
+        try:
+            items = os.listdir(desktop_path)[:20]
+            if items:
+                context_parts.append(f"Files on Desktop:\n" + "\n".join(f"  {item}" for item in items))
+        except:
+            pass
+    
+    return "\n\n".join(context_parts) if context_parts else ""
+
+def get_command(user_input: str, cwd: str) -> str:
     history_context = format_history()
+    file_context = get_file_context(cwd)
     
     # Platform-specific shell instructions
     if PLATFORM["name"] == "Windows":
@@ -349,23 +371,24 @@ Use PowerShell cmdlets and syntax. Examples:
     prompt = f"""{shell_instructions}
 Current directory: {cwd}
 
+AVAILABLE FILES/FOLDERS (use EXACT names with correct spelling and spacing):
+{file_context}
+
 Recent command history:
 {history_context}
 
-Rules:
+CRITICAL RULES:
 - Output ONLY the command, nothing else
 - No explanations, no markdown, no backticks
+- IMPORTANT: Match user's description to the EXACT file/folder name from the listing above
+- For example, if user says "resume folder" and listing shows "Current Resume", use "Current Resume"
+- Paths with spaces must be quoted: "C:\\Users\\Name\\Desktop\\Folder Name"
 - If unclear, make a reasonable assumption
-- Prefer simple, common commands
-- Use the command history for context (e.g., "do that again", "delete the file I just created")
+- Use the command history for context
 
 User request: {user_input}"""
 
-    response = client.models.generate_content(
-        model="gemini-2.0-flash",
-        contents=prompt
-    )
-    return response.text.strip()
+    return get_ai_response(prompt)
 
 def is_natural_language(text: str) -> bool:
     if text.startswith("!"):
@@ -441,22 +464,48 @@ def run_command(cmd: str) -> tuple:
     """Run a command and return (stdout, stderr)."""
     try:
         if PLATFORM["name"] == "Windows":
-            result = subprocess.run(
-                ["powershell", "-Command", cmd],
-                capture_output=True, text=True, shell=False
+            # Use Popen for better output handling on Windows
+            process = subprocess.Popen(
+                ["powershell", "-NoProfile", "-Command", cmd],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                encoding='utf-8',
+                errors='replace'
             )
+            stdout, stderr = process.communicate(timeout=60)
+            return stdout, stderr
         else:
             result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-        return result.stdout, result.stderr
+            return result.stdout, result.stderr
+    except subprocess.TimeoutExpired:
+        process.kill()
+        return "", "Command timed out"
     except Exception as e:
         return "", str(e)
 
 def main():
+    # Parse arguments
+    parser = argparse.ArgumentParser(
+        description="OpenSH - Talk to your terminal in plain English",
+        epilog="Example: opsh -c 'show me large files'"
+    )
+    parser.add_argument(
+        '-c', '--command',
+        nargs='*',
+        help='Run a single natural language query and exit'
+    )
+    parser.add_argument(
+        '-v', '--version',
+        action='version',
+        version=f'OpenSH v{__version__}'
+    )
+    args = parser.parse_args()
+    
     # Check if first run (no auth configured)
     config = load_config()
-    client = None
     
-    if not config.get("auth_method"):
+    if not config.get("provider"):
         # First run - show welcome and auth setup
         print("\n\033[1m🚀 Welcome to OpenSH!\033[0m")
         print("Talk to your terminal in plain English.\n")
@@ -466,26 +515,16 @@ def main():
             print("\033[31mAuthentication required to use OpenSH.\033[0m")
             sys.exit(1)
     
-    # Get client
-    client = get_client()
-    if not client:
-        print("\033[33mNo valid authentication. Let's set it up:\033[0m")
-        auth_result = setup_authentication()
-        if auth_result:
-            client = get_client()
-    
-    if not client:
-        print("\033[31mCouldn't authenticate. Please try again.\033[0m")
-        sys.exit(1)
-    
     # Handle single command mode (-c flag)
     if args.command:
         query = ' '.join(args.command)
         cwd = os.getcwd()
-        command = get_command(client, query, cwd)
-        print(f"\033[33m→ {command}\033[0m")
-        confirm = input("[Enter to run, or type to cancel] ").strip()
-        if confirm == "":
+        try:
+            print("\033[90m⏳ thinking...\033[0m", end="\r", flush=True)
+            command = get_command(query, cwd)
+            print(" " * 20, end="\r")
+            print(f"\033[33m→ {command}\033[0m")
+            # Auto-execute
             if command.startswith("cd "):
                 path = os.path.expanduser(command[3:].strip())
                 if PLATFORM["name"] == "Windows":
@@ -497,9 +536,12 @@ def main():
                     print(f"cd: {e}")
             else:
                 stdout, stderr = run_command(command)
-                print(stdout, end="")
+                if stdout:
+                    print(stdout)
                 if stderr:
-                    print(stderr, end="")
+                    print(stderr)
+        except Exception as e:
+            print(f"\033[31mError: {e}\033[0m")
         return
     
     print("\033[1mOpenSH\033[0m ready! Type naturally or use !help\n")
@@ -507,7 +549,8 @@ def main():
     while True:
         try:
             cwd = os.getcwd()
-            prompt = f"\033[32m{os.path.basename(cwd)}\033[0m > "
+            # Show full path like default Windows terminal
+            prompt = f"\033[32m{cwd}\033[0m > "
             user_input = input(prompt).strip()
             
             if not user_input:
@@ -535,7 +578,6 @@ def main():
             if user_input == "!auth":
                 auth_result = setup_authentication()
                 if auth_result:
-                    client = get_client()
                     print("\033[32m✓ Authentication updated!\033[0m\n")
                 continue
             
@@ -586,25 +628,28 @@ def main():
                     print(stderr, end="")
                 add_to_history(user_input, stdout + stderr)
                 continue
+            # Show thinking indicator
+            print("\033[90m⏳ thinking...\033[0m", end="\r", flush=True)
+            command = get_command(user_input, cwd)
+            print(" " * 20, end="\r")  # Clear the thinking message
+            print(f"\033[33m→ {command}\033[0m")
             
-            command = get_command(client, user_input, cwd)
-            confirm = input(f"\033[33m→ {command}\033[0m [Enter] ")
-            
-            if confirm == "":
-                if command.startswith("cd "):
-                    path = os.path.expanduser(command[3:].strip())
-                    if PLATFORM["name"] == "Windows":
-                        path = path.replace("/", "\\")
-                    try:
-                        os.chdir(path)
-                    except Exception as e:
-                        print(f"cd: {e}")
-                else:
-                    stdout, stderr = run_command(command)
-                    print(stdout, end="")
-                    if stderr:
-                        print(stderr, end="")
-                    add_to_history(command, stdout + stderr)
+            # Auto-execute the command
+            if command.startswith("cd "):
+                path = os.path.expanduser(command[3:].strip())
+                if PLATFORM["name"] == "Windows":
+                    path = path.replace("/", "\\")
+                try:
+                    os.chdir(path)
+                except Exception as e:
+                    print(f"cd: {e}")
+            else:
+                stdout, stderr = run_command(command)
+                if stdout:
+                    print(stdout)
+                if stderr:
+                    print(stderr)
+                add_to_history(command, stdout + stderr)
             
         except (EOFError, KeyboardInterrupt):
             show_goodbye()
@@ -613,8 +658,9 @@ def main():
             continue
         except Exception as e:
             err = str(e)
-            if "429" in err or "quota" in err.lower():
-                print("\033[31mRate limit hit - wait a moment and try again\033[0m")
+            if "429" in err or "quota" in err.lower() or "rate" in err.lower():
+                print("\033[31mRate limit hit - waiting 5 seconds...\033[0m")
+                time.sleep(5)
             elif "API_KEY" in err or "api_key" in err or "authentication" in err.lower():
                 print("\033[31mAuth error - run !auth to update your credentials\033[0m")
             elif "InterruptedError" not in err and "KeyboardInterrupt" not in err:
