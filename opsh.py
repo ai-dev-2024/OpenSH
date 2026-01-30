@@ -8,7 +8,7 @@ Based on nlsh (https://github.com/junaid-mahmood/nlsh) by Junaid Mahmood
 Support: https://ko-fi.com/ai_dev_2024
 """
 
-__version__ = "1.0.0"
+__version__ = "0.0.1"
 
 import signal
 import os

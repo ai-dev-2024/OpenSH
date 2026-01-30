@@ -4,15 +4,17 @@
 
 ![OpenSH Banner](https://img.shields.io/badge/OpenSH-Natural%20Language%20Shell-4285F4?style=for-the-badge&logo=google&logoColor=white)
 
+[![Version](https://img.shields.io/badge/version-0.0.1-blue?style=flat-square)](CHANGELOG.md)
 [![Windows](https://img.shields.io/badge/Windows-0078D6?style=flat-square&logo=windows&logoColor=white)](https://github.com/ai-dev-2024/OpenSH)
 [![macOS](https://img.shields.io/badge/macOS-000000?style=flat-square&logo=apple&logoColor=white)](https://github.com/ai-dev-2024/OpenSH)
 [![Linux](https://img.shields.io/badge/Linux-FCC624?style=flat-square&logo=linux&logoColor=black)](https://github.com/ai-dev-2024/OpenSH)
 [![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](LICENSE)
+[![CI](https://github.com/ai-dev-2024/OpenSH/actions/workflows/ci.yml/badge.svg)](https://github.com/ai-dev-2024/OpenSH/actions)
 
 **Talk to your terminal in plain English.**
 
-[Features](#-features) • [Installation](#-installation) • [Usage](#-usage) • [Support](#-support)
+[Features](#-features) • [Installation](#-installation) • [Usage](#-usage) • [Changelog](CHANGELOG.md) • [Support](#-support)
 
 </div>
 
