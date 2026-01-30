@@ -8,13 +8,15 @@ Based on nlsh (https://github.com/junaid-mahmood/nlsh) by Junaid Mahmood
 Support: https://ko-fi.com/ai_dev_2024
 """
 
-__version__ = "0.0.2"
+__version__ = "0.1.0"
 
 import signal
 import os
 import sys
 import subprocess
 import platform
+import json
+import webbrowser
 from pathlib import Path
 from datetime import datetime
 
@@ -68,6 +70,19 @@ if platform.system() != "Windows":
 
 script_dir = Path(__file__).parent.absolute()
 env_path = script_dir / ".env"
+config_path = script_dir / "config.json"
+
+def load_config():
+    """Load configuration from JSON file."""
+    if config_path.exists():
+        with open(config_path) as f:
+            return json.load(f)
+    return {}
+
+def save_config(config: dict):
+    """Save configuration to JSON file."""
+    with open(config_path, "w") as f:
+        json.dump(config, f, indent=2)
 
 def load_env():
     if env_path.exists():
@@ -82,94 +97,169 @@ def save_api_key(api_key: str):
     with open(env_path, "w") as f:
         f.write(f"GEMINI_API_KEY={api_key}\n")
 
-def save_auth_method(method: str):
-    """Save the authentication method used."""
-    auth_file = script_dir / ".auth_method"
-    with open(auth_file, "w") as f:
-        f.write(method)
-
-def get_auth_method() -> str:
-    """Get the saved authentication method."""
-    auth_file = script_dir / ".auth_method"
-    if auth_file.exists():
-        return auth_file.read_text().strip()
-    return "api_key"
-
-def setup_google_oauth():
-    """Set up authentication via Google OAuth (browser-based)."""
+def google_oauth_login():
+    """
+    Authenticate using Google OAuth via browser.
+    Opens Google Cloud auth page, user signs in, grants permission.
+    Returns credentials object on success, None on failure.
+    """
     try:
         from google_auth_oauthlib.flow import InstalledAppFlow
         from google.auth.transport.requests import Request
         import pickle
         
-        # OAuth scopes needed for Gemini API
-        SCOPES = ['https://www.googleapis.com/auth/generative-language']
-        
         creds_file = script_dir / ".google_creds.pickle"
         creds = None
         
+        # Check for existing credentials
         if creds_file.exists():
             with open(creds_file, 'rb') as f:
                 creds = pickle.load(f)
         
-        if not creds or not creds.valid:
-            if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-            else:
-                # Need to create OAuth client credentials first
-                print("\n\033[33mGoogle OAuth requires a client_secret.json file.\033[0m")
-                print("For now, please use an API key instead.")
-                print("\033[36mGet your free key at: https://aistudio.google.com/apikey\033[0m\n")
-                return None
-            
-            with open(creds_file, 'wb') as f:
-                pickle.dump(creds, f)
+        # If credentials are valid, use them
+        if creds and creds.valid:
+            print("\033[32m✓ Using saved Google credentials\033[0m")
+            return creds
         
-        save_auth_method("oauth")
+        # Try to refresh expired credentials
+        if creds and creds.expired and creds.refresh_token:
+            try:
+                creds.refresh(Request())
+                with open(creds_file, 'wb') as f:
+                    pickle.dump(creds, f)
+                print("\033[32m✓ Refreshed Google credentials\033[0m")
+                return creds
+            except Exception:
+                pass  # Will do full auth below
+        
+        # Need fresh OAuth - use Google AI Studio's OAuth
+        print("\n\033[36m🌐 Opening Google Sign-in in your browser...\033[0m")
+        print("\033[90m(If browser doesn't open, visit the URL shown)\033[0m\n")
+        
+        # Google AI's OAuth client ID (public, for AI Studio)
+        # This allows users to authenticate with their Google account
+        client_config = {
+            "installed": {
+                "client_id": "764086051850-6qr4p6gpi6hn506pt8ejuq83di341hur.apps.googleusercontent.com",
+                "client_secret": "d-FL95Q19q7MQmFpd7hHD0Ty",
+                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                "token_uri": "https://oauth2.googleapis.com/token",
+                "redirect_uris": ["http://localhost", "urn:ietf:wg:oauth:2.0:oob"]
+            }
+        }
+        
+        # Scopes needed for Gemini API
+        SCOPES = [
+            'https://www.googleapis.com/auth/generative-language.retriever',
+            'https://www.googleapis.com/auth/cloud-platform'
+        ]
+        
+        flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
+        
+        # This opens browser and waits for user to complete sign-in
+        creds = flow.run_local_server(
+            port=0,  # Random available port
+            prompt='consent',
+            success_message='✅ OpenSH authenticated! You can close this tab.'
+        )
+        
+        # Save credentials for future use
+        with open(creds_file, 'wb') as f:
+            pickle.dump(creds, f)
+        
+        print("\033[32m✓ Successfully signed in with Google!\033[0m\n")
         return creds
         
-    except ImportError:
-        print("\033[31mOAuth libraries not installed. Using API key instead.\033[0m")
+    except ImportError as e:
+        print(f"\033[31mOAuth libraries not available: {e}\033[0m")
+        print("Install with: pip install google-auth-oauthlib")
         return None
     except Exception as e:
-        print(f"\033[31mOAuth setup failed: {e}\033[0m")
+        print(f"\033[31mGoogle sign-in failed: {e}\033[0m")
         return None
 
 def setup_api_key():
-    """Set up authentication via API key."""
+    """Set up authentication via manual API key entry."""
     print(f"\n\033[36mGet your free key at: https://aistudio.google.com/apikey\033[0m")
     print("\033[90m(Takes ~30 seconds to create)\033[0m\n")
-    api_key = input("\033[33mEnter your Gemini API key:\033[0m ").strip()
+    api_key = input("\033[33mPaste your Gemini API key:\033[0m ").strip()
     if not api_key:
         print("No API key provided.")
-        sys.exit(1)
+        return None
     save_api_key(api_key)
-    save_auth_method("api_key")
     os.environ["GEMINI_API_KEY"] = api_key
+    
+    # Save config
+    config = load_config()
+    config["auth_method"] = "api_key"
+    save_config(config)
+    
     print("\033[32m✓ API key saved!\033[0m\n")
+    return api_key
 
 def setup_authentication():
-    """Interactive authentication setup."""
-    print("\n\033[1m🔐 OpenSH Authentication Setup\033[0m\n")
-    print("Choose authentication method:")
-    print("  \033[36m1\033[0m. API Key (recommended - quick & easy)")
-    print("  \033[36m2\033[0m. Google Account (OAuth - coming soon)")
+    """Interactive authentication setup - choose Google or API key."""
+    print("\n\033[1m🔐 OpenSH Authentication\033[0m\n")
+    print("How would you like to authenticate?\n")
+    print("  \033[36m1\033[0m. \033[1mGoogle Account\033[0m (recommended)")
+    print("     Sign in with your Google account - no API key needed")
+    print()
+    print("  \033[36m2\033[0m. \033[1mCustom API Key\033[0m")
+    print("     Use your own Gemini API key from aistudio.google.com")
     print()
     
     choice = input("\033[33mEnter choice [1]:\033[0m ").strip() or "1"
     
-    if choice == "2":
-        creds = setup_google_oauth()
+    if choice == "1":
+        creds = google_oauth_login()
         if creds:
+            config = load_config()
+            config["auth_method"] = "oauth"
+            save_config(config)
             return {"credentials": creds}
-        # Fall back to API key if OAuth fails
-        print("\nFalling back to API key authentication...\n")
+        
+        print("\n\033[33mGoogle sign-in didn't work. Let's try API key instead.\033[0m\n")
     
-    setup_api_key()
-    return {"api_key": os.getenv("GEMINI_API_KEY")}
+    api_key = setup_api_key()
+    if api_key:
+        return {"api_key": api_key}
+    
+    return None
+
+def get_client():
+    """Get the Gemini client with appropriate authentication."""
+    from google import genai
+    
+    config = load_config()
+    auth_method = config.get("auth_method", "")
+    
+    # Try OAuth credentials first
+    if auth_method == "oauth":
+        creds_file = script_dir / ".google_creds.pickle"
+        if creds_file.exists():
+            import pickle
+            from google.auth.transport.requests import Request
+            
+            with open(creds_file, 'rb') as f:
+                creds = pickle.load(f)
+            
+            if creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+                with open(creds_file, 'wb') as f:
+                    pickle.dump(creds, f)
+            
+            if creds.valid:
+                return genai.Client(credentials=creds)
+    
+    # Fall back to API key
+    api_key = os.getenv("GEMINI_API_KEY")
+    if api_key:
+        return genai.Client(api_key=api_key)
+    
+    return None
 
 def show_help():
-    print("\033[36m!api\033[0m       - Change API key")
+    print("\033[36m!auth\033[0m      - Change authentication method")
     print("\033[36m!version\033[0m   - Show version info")
     print("\033[36m!credits\033[0m   - Show credits")
     print("\033[36m!uninstall\033[0m - Remove OpenSH")
@@ -180,8 +270,11 @@ def show_help():
     print()
 
 def show_version():
+    config = load_config()
+    auth_method = config.get("auth_method", "not configured")
     print(f"\n\033[1mOpenSH\033[0m v{__version__}")
     print(f"Platform: {PLATFORM['name']} ({PLATFORM['shell']})")
+    print(f"Auth: {auth_method}")
     print(f"Python: {platform.python_version()}")
     print(f"GitHub: https://github.com/ai-dev-2024/OpenSH")
     print()
@@ -204,22 +297,8 @@ def show_goodbye():
     print("\033[36mGoodbye! Thanks for using OpenSH ☕\033[0m")
     print("\033[36m─────────────────────────────────────────\033[0m\n")
 
+# Initialize
 load_env()
-
-first_run = not os.getenv("GEMINI_API_KEY")
-if first_run:
-    auth_config = setup_authentication()
-    print("\033[1mOpenSH\033[0m - talk to your terminal\n")
-    show_help()
-
-from google import genai
-
-# Initialize client with appropriate authentication
-if os.getenv("GEMINI_API_KEY"):
-    client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-else:
-    print("\033[31mNo authentication configured. Run !api to set up.\033[0m")
-    sys.exit(1)
 
 command_history = []
 MAX_HISTORY = 10
@@ -253,7 +332,7 @@ def format_history() -> str:
                 lines.append(f"   {line}")
     return "\n".join(lines)
 
-def get_command(user_input: str, cwd: str) -> str:
+def get_command(client, user_input: str, cwd: str) -> str:
     history_context = format_history()
     
     # Platform-specific shell instructions
@@ -291,7 +370,7 @@ Rules:
 User request: {user_input}"""
 
     response = client.models.generate_content(
-        model="gemini-2.5-flash",
+        model="gemini-2.0-flash",
         contents=prompt
     )
     return response.text.strip()
@@ -300,94 +379,64 @@ def is_natural_language(text: str) -> bool:
     if text.startswith("!"):
         return False
     
-    # Exit commands - always natural language to trigger exit
+    # Exit commands
     if text.lower() in ["exit", "quit", "bye", "goodbye"]:
         return False
     
     # Common shell commands that should run directly
     if PLATFORM["name"] == "Windows":
-        # Windows/PowerShell commands - comprehensive list
         shell_commands = [
-            # Basic commands
             "dir", "cls", "type", "copy", "move", "del", "md", "rd", 
             "pwd", "ls", "cat", "clear", "whoami", "date", "time",
-            # Network
             "ipconfig", "ping", "netstat", "nslookup", "tracert", "arp",
-            # System
             "tasklist", "taskkill", "systeminfo", "hostname", "ver",
-            # Disk
             "diskpart", "chkdsk", "format",
-            # Other
             "tree", "fc", "comp", "more", "sort", "find", "findstr",
             "attrib", "xcopy", "robocopy", "where", "set", "path",
         ]
         shell_starters = [
-            # Basic navigation
             "cd ", "cd\\", "cd/", "dir ", "echo ", "type ", 
-            # File operations
             "copy ", "move ", "del ", "ren ", "rename ", "md ", "mkdir ",
             "rd ", "rmdir ", "attrib ", "xcopy ", "robocopy ",
-            # PowerShell cmdlets
             "Get-", "Set-", "New-", "Remove-", "Copy-", "Move-", "Out-",
             "Write-", "Read-", "Start-", "Stop-", "Invoke-", "Test-",
             "Select-", "Where-", "ForEach-", "Sort-", "Group-",
-            # Development tools
             "git ", "npm ", "node ", "npx ", "yarn ", "pnpm ",
             "python ", "python3 ", "py ", "pip ", "pip3 ",
             "cargo ", "rustc ", "go ", "java ", "javac ",
             "dotnet ", "nuget ",
-            # Other tools
             "curl ", "wget ", "ssh ", "scp ", "docker ", "kubectl ",
             "code ", "notepad ", "explorer ",
-            # Operators and paths
             "./", ".\\", "/", "\\", "~", "$", ">", ">>", "|", "&&", ";",
         ]
     else:
-        # Unix commands - comprehensive list
         shell_commands = [
-            # Basic
             "ls", "pwd", "clear", "whoami", "date", "cal", "uptime",
-            # Process
             "top", "htop", "ps", "kill", "killall", "jobs", "bg", "fg",
-            # Files
             "cat", "head", "tail", "less", "more", "touch", "stat",
-            # Search
             "find", "grep", "awk", "sed", "wc", "sort", "uniq", "diff",
-            # Compression
             "tar", "zip", "unzip", "gzip", "gunzip", "bzip2",
-            # User/permissions
             "chmod", "chown", "chgrp", "id", "groups", "passwd",
-            # System
             "df", "du", "free", "mount", "umount", 
-            # Network
             "ping", "curl", "wget", "ssh", "scp", "netstat", "ifconfig", "ip",
-            # Package managers
             "apt", "yum", "dnf", "pacman", "brew", "snap", "flatpak",
-            # Other
             "man", "which", "whereis", "history", "alias", "source", "export",
         ]
         shell_starters = [
-            # Navigation
             "cd ", "ls ", "ll ", 
-            # File ops
             "cat ", "head ", "tail ", "touch ", "rm ", "cp ", "mv ",
             "mkdir ", "rmdir ", "chmod ", "chown ", "ln ",
-            # Text processing
             "echo ", "grep ", "sed ", "awk ", "cut ", "tr ", "xargs ",
-            # Development
             "git ", "npm ", "node ", "npx ", "yarn ", "pnpm ",
             "python ", "python3 ", "pip ", "pip3 ",
             "cargo ", "rustc ", "go ", "java ", "javac ",
             "make ", "cmake ", "gcc ", "g++ ", "clang ",
-            # Package managers
             "brew ", "apt ", "apt-get ", "yum ", "dnf ", "pacman ", "snap ",
-            # Other
             "sudo ", "su ", "ssh ", "scp ", "curl ", "wget ",
             "docker ", "kubectl ", "aws ", "gcloud ", "az ",
             "vi ", "vim ", "nano ", "emacs ", "code ",
             "open ", "xdg-open ",
             "export ", "source ", "alias ",
-            # Operators and paths
             "./", "/", "~", "$", ">", ">>", "|", "&&", ";",
         ]
     
@@ -400,7 +449,6 @@ def run_command(cmd: str) -> tuple:
     """Run a command and return (stdout, stderr)."""
     try:
         if PLATFORM["name"] == "Windows":
-            # Use PowerShell on Windows
             result = subprocess.run(
                 ["powershell", "-Command", cmd],
                 capture_output=True, text=True, shell=False
@@ -412,7 +460,33 @@ def run_command(cmd: str) -> tuple:
         return "", str(e)
 
 def main():
-    global client
+    # Check if first run (no auth configured)
+    config = load_config()
+    client = None
+    
+    if not config.get("auth_method"):
+        # First run - show welcome and auth setup
+        print("\n\033[1m🚀 Welcome to OpenSH!\033[0m")
+        print("Talk to your terminal in plain English.\n")
+        
+        auth_result = setup_authentication()
+        if not auth_result:
+            print("\033[31mAuthentication required to use OpenSH.\033[0m")
+            sys.exit(1)
+    
+    # Get client
+    client = get_client()
+    if not client:
+        print("\033[33mNo valid authentication. Let's set it up:\033[0m")
+        auth_result = setup_authentication()
+        if auth_result:
+            client = get_client()
+    
+    if not client:
+        print("\033[31mCouldn't authenticate. Please try again.\033[0m")
+        sys.exit(1)
+    
+    print("\033[1mOpenSH\033[0m ready! Type naturally or use !help\n")
     
     while True:
         try:
@@ -428,7 +502,7 @@ def main():
                 show_goodbye()
                 break
             
-            # Handle cd command specially (works in-process)
+            # Handle cd command specially
             if user_input.startswith("cd "):
                 path = os.path.expanduser(user_input[3:].strip())
                 if PLATFORM["name"] == "Windows":
@@ -442,9 +516,11 @@ def main():
                 os.chdir(Path.home())
                 continue
             
-            if user_input == "!api":
-                setup_api_key()
-                client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+            if user_input == "!auth":
+                auth_result = setup_authentication()
+                if auth_result:
+                    client = get_client()
+                    print("\033[32m✓ Authentication updated!\033[0m\n")
                 continue
             
             if user_input == "!version":
@@ -495,7 +571,7 @@ def main():
                 add_to_history(user_input, stdout + stderr)
                 continue
             
-            command = get_command(user_input, cwd)
+            command = get_command(client, user_input, cwd)
             confirm = input(f"\033[33m→ {command}\033[0m [Enter] ")
             
             if confirm == "":
@@ -524,7 +600,7 @@ def main():
             if "429" in err or "quota" in err.lower():
                 print("\033[31mRate limit hit - wait a moment and try again\033[0m")
             elif "API_KEY" in err or "api_key" in err or "authentication" in err.lower():
-                print("\033[31mAPI key error - run !api to update your key\033[0m")
+                print("\033[31mAuth error - run !auth to update your credentials\033[0m")
             elif "InterruptedError" not in err and "KeyboardInterrupt" not in err:
                 print(f"\033[31mError: {err[:100]}\033[0m")
 

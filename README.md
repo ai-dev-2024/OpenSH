@@ -4,7 +4,7 @@
 
 ![OpenSH Banner](https://img.shields.io/badge/OpenSH-Natural%20Language%20Shell-4285F4?style=for-the-badge&logo=google&logoColor=white)
 
-[![Version](https://img.shields.io/badge/version-0.0.2-blue?style=flat-square)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.1.0-blue?style=flat-square)](CHANGELOG.md)
 [![Windows](https://img.shields.io/badge/Windows-0078D6?style=flat-square&logo=windows&logoColor=white)](https://github.com/ai-dev-2024/OpenSH)
 [![macOS](https://img.shields.io/badge/macOS-000000?style=flat-square&logo=apple&logoColor=white)](https://github.com/ai-dev-2024/OpenSH)
 [![Linux](https://img.shields.io/badge/Linux-FCC624?style=flat-square&logo=linux&logoColor=black)](https://github.com/ai-dev-2024/OpenSH)
