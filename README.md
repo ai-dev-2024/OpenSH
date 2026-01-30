@@ -1,21 +1,42 @@
-# OpenSH - Open Natural Language Shell
+# 🚀 OpenSH - Open Natural Language Shell
 
-Talk to your terminal in plain English. Works on **Windows**, **macOS**, and **Linux**.
+<div align="center">
 
-> Powered by Google Gemini AI
+![OpenSH Banner](https://img.shields.io/badge/OpenSH-Natural%20Language%20Shell-4285F4?style=for-the-badge&logo=google&logoColor=white)
 
-## Install
+[![Windows](https://img.shields.io/badge/Windows-0078D6?style=flat-square&logo=windows&logoColor=white)](https://github.com/ai-dev-2024/OpenSH)
+[![macOS](https://img.shields.io/badge/macOS-000000?style=flat-square&logo=apple&logoColor=white)](https://github.com/ai-dev-2024/OpenSH)
+[![Linux](https://img.shields.io/badge/Linux-FCC624?style=flat-square&logo=linux&logoColor=black)](https://github.com/ai-dev-2024/OpenSH)
+[![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](LICENSE)
+
+**Talk to your terminal in plain English.**
+
+[Features](#-features) • [Installation](#-installation) • [Usage](#-usage) • [Support](#-support)
+
+</div>
+
+---
+
+## ✨ Features
+
+- 🌍 **Multi-Platform** - Works on Windows, macOS, and Linux
+- 🤖 **AI-Powered** - Uses Google Gemini to understand natural language
+- ⚡ **Smart Detection** - Recognizes shell commands and runs them directly
+- 🔄 **Context-Aware** - Remembers your command history for better suggestions
+- 💻 **Platform-Native** - Generates PowerShell on Windows, bash/zsh on Unix
+
+## 📦 Installation
+
+### Prerequisites
+
+- **Python 3.8+** installed
+- A **free Google Gemini API key** from [Google AI Studio](https://aistudio.google.com/apikey)
 
 ### Windows (PowerShell)
 
 ```powershell
-# Download and run the installer
-irm https://raw.githubusercontent.com/YOUR_USERNAME/OpenSH/main/install.ps1 | iex
-```
-
-Or manually:
-```powershell
-git clone https://github.com/YOUR_USERNAME/OpenSH.git
+git clone https://github.com/ai-dev-2024/OpenSH.git
 cd OpenSH
 .\install.ps1
 ```
@@ -23,88 +44,99 @@ cd OpenSH
 ### macOS / Linux
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/OpenSH/main/install.sh | bash
+git clone https://github.com/ai-dev-2024/OpenSH.git
+cd OpenSH
+bash install.sh
 ```
 
-## Uninstall
+<details>
+<summary><b>One-liner install (after GitHub release)</b></summary>
 
-### Windows
+**Windows:**
 ```powershell
-irm https://raw.githubusercontent.com/YOUR_USERNAME/OpenSH/main/uninstall.ps1 | iex
+irm https://raw.githubusercontent.com/ai-dev-2024/OpenSH/main/install.ps1 | iex
 ```
 
-### macOS / Linux
+**macOS/Linux:**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/OpenSH/main/uninstall.sh | bash
+curl -fsSL https://raw.githubusercontent.com/ai-dev-2024/OpenSH/main/install.sh | bash
 ```
 
-## Usage
+</details>
+
+## 🚀 Usage
 
 ```bash
 opsh
 ```
 
-Type naturally:
-- `list all python files` → `Get-ChildItem *.py` (Windows) / `find . -name "*.py"` (Unix)
-- `git commit with message fixed bug` → `git commit -m "fixed bug"`
-- `show disk usage` → `Get-PSDrive C` (Windows) / `df -h` (Unix)
-- `find large files` → appropriate command for your OS
+On first run, you'll be prompted to enter your **free Gemini API key**.
+
+### Natural Language Examples
+
+| You type | OpenSH generates |
+|----------|------------------|
+| `list all python files` | `Get-ChildItem *.py` (Win) / `find . -name "*.py"` (Unix) |
+| `show disk space` | `Get-PSDrive C` (Win) / `df -h` (Unix) |
+| `git commit with message fixed bug` | `git commit -m "fixed bug"` |
+| `find large files over 100MB` | Appropriate command for your OS |
 
 ### Commands
+
 | Command | Description |
 |---------|-------------|
 | `!api` | Change API key |
 | `!help` | Show help |
 | `!credits` | Show credits |
-| `!cmd` | Run command directly (bypass AI) |
+| `!<cmd>` | Run command directly |
 | `Ctrl+C` | Exit |
 
-### Examples
+## 🔧 How It Works
 
 ```
-Desktop > list all text files
-→ Get-ChildItem -Filter *.txt [Enter]
-
-file1.txt
-file2.txt
-
-Desktop > show me the contents of file1.txt
-→ Get-Content file1.txt [Enter]
-
-Hello, world!
-
-Desktop > delete that file
-→ Remove-Item file1.txt [Enter]
+┌─────────────┐     ┌──────────────┐     ┌─────────────┐
+│  You type   │ ──► │   Gemini AI  │ ──► │   Command   │
+│  naturally  │     │  translates  │     │   executes  │
+└─────────────┘     └──────────────┘     └─────────────┘
 ```
 
-## Requirements
+1. Type a natural language request
+2. OpenSH sends it to Gemini AI with platform context
+3. Review the suggested command
+4. Press Enter to execute (or type something else to cancel)
 
-- Python 3.8+
-- A free Google Gemini API key from [Google AI Studio](https://aistudio.google.com/apikey)
+**Note:** Direct shell commands (like `cd`, `ls`, `dir`, `git`) bypass AI and run immediately.
 
-## How It Works
+## 🗑️ Uninstall
 
-1. You type a natural language request
-2. OpenSH uses Gemini AI to translate it to a shell command
-3. You review and confirm the command (press Enter)
-4. The command runs
+### Windows
+```powershell
+.\uninstall.ps1
+```
 
-Direct shell commands (like `cd`, `ls`, `dir`, `git`) are passed through without AI translation.
+### macOS / Linux
+```bash
+bash uninstall.sh
+```
 
 ---
 
-## Credits
+## 💖 Support
 
-OpenSH is based on [nlsh](https://github.com/junaid-mahmood/nlsh) by **Junaid Mahmood**.
+If you find OpenSH useful, consider supporting the project:
 
-### Support
-
-If you find OpenSH useful, consider buying me a coffee:
-
-☕ **[ko-fi.com/ai_dev_2024](https://ko-fi.com/ai_dev_2024)**
+<a href="https://ko-fi.com/ai_dev_2024">
+  <img src="https://img.shields.io/badge/☕_Buy_me_a_coffee-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Ko-fi"/>
+</a>
 
 ---
 
-## License
+## 📜 Credits
 
-MIT License - see [LICENSE](LICENSE)
+OpenSH is based on [**nlsh**](https://github.com/junaid-mahmood/nlsh) by Junaid Mahmood.
+
+---
+
+<div align="center">
+<sub>Made with ❤️ for the command line</sub>
+</div>
