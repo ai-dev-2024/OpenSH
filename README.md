@@ -4,7 +4,7 @@
 
 ![OpenSH Banner](https://img.shields.io/badge/OpenSH-Natural%20Language%20Shell-4285F4?style=for-the-badge&logo=google&logoColor=white)
 
-[![Version](https://img.shields.io/badge/version-0.1.0-blue?style=flat-square)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.1.1-blue?style=flat-square)](CHANGELOG.md)
 [![Windows](https://img.shields.io/badge/Windows-0078D6?style=flat-square&logo=windows&logoColor=white)](https://github.com/ai-dev-2024/OpenSH)
 [![macOS](https://img.shields.io/badge/macOS-000000?style=flat-square&logo=apple&logoColor=white)](https://github.com/ai-dev-2024/OpenSH)
 [![Linux](https://img.shields.io/badge/Linux-FCC624?style=flat-square&logo=linux&logoColor=black)](https://github.com/ai-dev-2024/OpenSH)
@@ -87,11 +87,22 @@ On first run, you'll be prompted to enter your **free Gemini API key**.
 
 | Command | Description |
 |---------|-------------|
-| `!api` | Change API key |
+| `!auth` | Change authentication/API key |
+| `!version` | Show version info |
 | `!help` | Show help |
 | `!credits` | Show credits |
 | `!<cmd>` | Run command directly |
-| `Ctrl+C` | Exit |
+| `exit` | Exit OpenSH |
+| `Ctrl+C` | Exit OpenSH |
+
+### Quick Mode (from any terminal)
+
+After setup, use `ask` from any terminal:
+```powershell
+ask "show all python files"
+ask "find large files"
+ask "git status"
+```
 
 ## 🔧 How It Works
 
