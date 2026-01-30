@@ -14,14 +14,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.1] - 2026-01-30
+
+### Added
+- **Quick query mode** (`-c` flag) - Execute single commands from any terminal
+- **`ask` function** in PowerShell - Quick natural language queries
+- **Auto-launch message** - OpenSH ready notification on new terminals
+- **Browser auto-open** - Opens Google AI Studio during setup
+
+### Fixed
+- Removed Google OAuth (was blocked by Google's unverified app policy)
+- Simplified to API key only - more reliable
+
+### Changed
+- Setup now opens browser automatically for easier API key creation
+
+---
+
 ## [0.1.0] - 2026-01-30
 
 ### Added
-- 🔐 **Google Account Sign-in** - Authenticate via browser, no API key needed
-- Interactive authentication menu on first launch:
-  1. Google Account (opens browser → sign in → done)
-  2. Custom API Key (paste your own key)
-- `!auth` command to change authentication method anytime
+- Interactive authentication menu on first launch
+- `!auth` command to change API key anytime
 - JSON-based config storage for auth preferences
 
 ### Changed
@@ -73,13 +87,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date | Description |
 |---------|------|-------------|
-| 0.1.0 | 2026-01-30 | Google OAuth sign-in, improved auth flow |
-| 0.0.2 | 2026-01-30 | Authentication improvements, OAuth prep |
-| 0.0.1 | 2026-01-30 | Initial release with multi-platform support |
+| 0.1.1 | 2026-01-30 | Quick query mode, `ask` function, simplified auth |
+| 0.1.0 | 2026-01-30 | Auth menu, config storage |
+| 0.0.2 | 2026-01-30 | Authentication improvements |
+| 0.0.1 | 2026-01-30 | Initial multi-platform release |
 
 ---
 
-[Unreleased]: https://github.com/ai-dev-2024/OpenSH/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/ai-dev-2024/OpenSH/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/ai-dev-2024/OpenSH/releases/tag/v0.1.1
 [0.1.0]: https://github.com/ai-dev-2024/OpenSH/releases/tag/v0.1.0
 [0.0.2]: https://github.com/ai-dev-2024/OpenSH/releases/tag/v0.0.2
 [0.0.1]: https://github.com/ai-dev-2024/OpenSH/releases/tag/v0.0.1
