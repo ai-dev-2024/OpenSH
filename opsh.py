@@ -8,7 +8,7 @@ Based on nlsh (https://github.com/junaid-mahmood/nlsh) by Junaid Mahmood
 Support: https://ko-fi.com/ai_dev_2024
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 import signal
 import os
@@ -198,27 +198,19 @@ def setup_api_key():
     return api_key
 
 def setup_authentication():
-    """Interactive authentication setup - choose Google or API key."""
-    print("\n\033[1m🔐 OpenSH Authentication\033[0m\n")
-    print("How would you like to authenticate?\n")
-    print("  \033[36m1\033[0m. \033[1mGoogle Account\033[0m (recommended)")
-    print("     Sign in with your Google account - no API key needed")
-    print()
-    print("  \033[36m2\033[0m. \033[1mCustom API Key\033[0m")
-    print("     Use your own Gemini API key from aistudio.google.com")
-    print()
+    """Interactive authentication setup - API key based."""
+    print("\n\033[1m🔐 OpenSH Setup\033[0m\n")
+    print("OpenSH uses Google's Gemini AI to understand your requests.")
+    print("You need a \033[1mfree\033[0m API key from Google AI Studio.\n")
+    print("\033[36m→ Get your key at: https://aistudio.google.com/apikey\033[0m")
+    print("\033[90m  (Takes ~30 seconds - just click 'Create API Key')\033[0m\n")
     
-    choice = input("\033[33mEnter choice [1]:\033[0m ").strip() or "1"
-    
-    if choice == "1":
-        creds = google_oauth_login()
-        if creds:
-            config = load_config()
-            config["auth_method"] = "oauth"
-            save_config(config)
-            return {"credentials": creds}
-        
-        print("\n\033[33mGoogle sign-in didn't work. Let's try API key instead.\033[0m\n")
+    # Open browser to make it even easier
+    open_browser = input("\033[33mOpen Google AI Studio in browser? [Y/n]:\033[0m ").strip().lower()
+    if open_browser != 'n':
+        import webbrowser
+        webbrowser.open("https://aistudio.google.com/apikey")
+        print("\n\033[90mBrowser opened. Copy your API key and paste it below.\033[0m\n")
     
     api_key = setup_api_key()
     if api_key:
@@ -485,6 +477,30 @@ def main():
     if not client:
         print("\033[31mCouldn't authenticate. Please try again.\033[0m")
         sys.exit(1)
+    
+    # Handle single command mode (-c flag)
+    if args.command:
+        query = ' '.join(args.command)
+        cwd = os.getcwd()
+        command = get_command(client, query, cwd)
+        print(f"\033[33m→ {command}\033[0m")
+        confirm = input("[Enter to run, or type to cancel] ").strip()
+        if confirm == "":
+            if command.startswith("cd "):
+                path = os.path.expanduser(command[3:].strip())
+                if PLATFORM["name"] == "Windows":
+                    path = path.replace("/", "\\")
+                try:
+                    os.chdir(path)
+                    print(f"Changed to: {path}")
+                except Exception as e:
+                    print(f"cd: {e}")
+            else:
+                stdout, stderr = run_command(command)
+                print(stdout, end="")
+                if stderr:
+                    print(stderr, end="")
+        return
     
     print("\033[1mOpenSH\033[0m ready! Type naturally or use !help\n")
     
