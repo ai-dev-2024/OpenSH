@@ -31,16 +31,8 @@ jobs:
       - name: Syntax check
         run: python -m py_compile opsh.py
 
-      - name: Basic import test
-        run: |
-          python -c "
-          import sys
-          sys.path.insert(0, '.')
-          # Just check the file can be parsed
-          with open('opsh.py') as f:
-              compile(f.read(), 'opsh.py', 'exec')
-          print('Syntax OK')
-          "
+      - name: Version check
+        run: python opsh.py --version
 
   lint:
     name: Code Quality
@@ -55,13 +47,3 @@ jobs:
 
       - name: Check syntax
         run: python -m py_compile opsh.py
-
-      - name: Check for common issues
-        run: |
-          python -c "
-          import ast
-          with open('opsh.py') as f:
-              tree = ast.parse(f.read())
-          print('AST parsing OK')
-          print(f'Found {len([n for n in ast.walk(tree) if isinstance(n, ast.FunctionDef)])} functions')
-          "
