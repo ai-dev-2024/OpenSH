@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenSH - Natural Language Shell</title>
+    <meta name="description" content="Talk to your terminal in plain English. Stop memorizing commands.">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f0f1a;
+            --bg-secondary: #1a1a2e;
+            --text: #e0e0e0;
+            --text-muted: #888;
+            --accent: #667eea;
+            --accent-secondary: #764ba2;
+            --green: #4ade80;
+            --yellow: #facc15;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--bg) 0%, var(--bg-secondary) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 50%);
+            animation: pulse 15s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+
+            50% {
+                transform: scale(1.2);
+                opacity: 0.8;
+            }
+        }
+
+        .logo {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .tagline {
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .terminal {
+            background: #1e1e2e;
+            border-radius: 12px;
+            padding: 1.5rem;
+            max-width: 600px;
+            width: 100%;
+            text-align: left;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .terminal-header {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .terminal-dot.red {
+            background: #ff5f57;
+        }
+
+        .terminal-dot.yellow {
+            background: #febc2e;
+        }
+
+        .terminal-dot.green {
+            background: #28c840;
+        }
+
+        .terminal-line {
+            margin: 0.5rem 0;
+        }
+
+        .prompt {
+            color: var(--green);
+        }
+
+        .command {
+            color: var(--text);
+        }
+
+        .output {
+            color: var(--yellow);
+        }
+
+        .result {
+            color: var(--text-muted);
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .features {
+            padding: 6rem 2rem;
+            background: var(--bg-secondary);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature p {
+            color: var(--text-muted);
+        }
+
+        .install {
+            padding: 6rem 2rem;
+            text-align: center;
+        }
+
+        .install h2 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .install-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .install-tab {
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .install-tab:hover,
+        .install-tab.active {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .install-code {
+            background: #1e1e2e;
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            max-width: 700px;
+            margin: 0 auto;
+            text-align: left;
+            overflow-x: auto;
+        }
+
+        .footer {
+            padding: 3rem 2rem;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .kofi {
+            display: inline-block;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            .terminal {
+                font-size: 0.8rem;
+            }
+
+            .btn {
+                padding: 0.875rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <section class="hero">
+        <div class="logo">🚀</div>
+        <h1>OpenSH</h1>
+        <p class="tagline">Talk to your terminal in plain English</p>
+
+        <div class="terminal">
+            <div class="terminal-header">
+                <div class="terminal-dot red"></div>
+                <div class="terminal-dot yellow"></div>
+                <div class="terminal-dot green"></div>
+            </div>
+            <div class="terminal-line">
+                <span class="prompt">C:\Users\You &gt;</span>
+                <span class="command"> show all python files on desktop</span>
+            </div>
+            <div class="terminal-line">
+                <span class="output">→ Get-ChildItem "$env:USERPROFILE\Desktop" -Filter "*.py"</span>
+            </div>
+            <div class="terminal-line">
+                <span class="result">script.py app.py utils.py</span>
+            </div>
+        </div>
+
+        <div class="cta-buttons">
+            <a href="https://github.com/ai-dev-2024/OpenSH" class="btn btn-primary">⭐ View on GitHub</a>
+            <a href="https://github.com/ai-dev-2024/OpenSH/releases/latest" class="btn btn-secondary">📦 Download</a>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="features-grid">
+            <div class="feature">
+                <div class="feature-icon">🧠</div>
+                <h3>Natural Language</h3>
+                <p>Type what you want in plain English. No more memorizing cryptic commands.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">⚡</div>
+                <h3>Auto-Execute</h3>
+                <p>See the translated command and watch it run instantly. Learn as you go.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🌍</div>
+                <h3>Cross-Platform</h3>
+                <p>Works on Windows, macOS, and Linux with native commands for each.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🆓</div>
+                <h3>100% Free</h3>
+                <p>Uses free API tiers from Groq or Google Gemini. No subscriptions needed.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🚀</div>
+                <h3>Auto-Start</h3>
+                <p>Opens automatically with every new terminal. Just install and go.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📁</div>
+                <h3>Context-Aware</h3>
+                <p>Sees your files and folders to generate accurate, relevant commands.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="install">
+        <h2>Quick Install</h2>
+        <div class="install-tabs">
+            <button class="install-tab active" onclick="showInstall('windows')">Windows</button>
+            <button class="install-tab" onclick="showInstall('unix')">macOS / Linux</button>
+        </div>
+        <div id="install-windows" class="install-code">irm
+            https://raw.githubusercontent.com/ai-dev-2024/OpenSH/main/install.ps1 | iex</div>
+        <div id="install-unix" class="install-code" style="display:none">curl -fsSL
+            https://raw.githubusercontent.com/ai-dev-2024/OpenSH/main/install.sh | bash</div>
+    </section>
+
+    <footer class="footer">
+        <p>Made with ❤️ by <a href="https://github.com/ai-dev-2024">AI Dev 2024</a></p>
+        <a href="https://ko-fi.com/ai_dev_2024" class="kofi">
+            <img src="https://img.shields.io/badge/☕_Support_on_Ko--fi-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white"
+                alt="Ko-fi" />
+        </a>
+    </footer>
+
+    <script>
+        function showInstall(os) {
+            document.querySelectorAll('.install-code').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.install-tab').forEach(el => el.classList.remove('active'));
+            document.getElementById('install-' + os).style.display = 'block';
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+
+</html>
