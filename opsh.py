@@ -635,10 +635,23 @@ def main():
             print(f"\033[33m→ {command}\033[0m")
             
             # Auto-execute the command
-            if command.startswith("cd "):
-                path = os.path.expanduser(command[3:].strip())
+            # Handle directory change commands specially (they need to be run in Python, not subprocess)
+            cd_path = None
+            if command.lower().startswith("cd "):
+                cd_path = command[3:].strip()
+            elif command.lower().startswith("set-location "):
+                cd_path = command[13:].strip()
+            elif command.lower().startswith("chdir "):
+                cd_path = command[6:].strip()
+            
+            if cd_path:
+                # Remove quotes if present
+                cd_path = cd_path.strip('"').strip("'")
+                path = os.path.expanduser(cd_path)
+                # Expand environment variables like $env:USERPROFILE
                 if PLATFORM["name"] == "Windows":
                     path = path.replace("/", "\\")
+                    path = os.path.expandvars(path.replace("$env:", "%").replace("%USERPROFILE", "%USERPROFILE%"))
                 try:
                     os.chdir(path)
                 except Exception as e:
