@@ -64,6 +64,20 @@ def get_platform_info():
 
 PLATFORM = get_platform_info()
 
+def check_for_updates():
+    """Check GitHub for new version (silent, non-blocking)."""
+    try:
+        url = "https://api.github.com/repos/ai-dev-2024/OpenSH/releases/latest"
+        req = urllib.request.Request(url, headers={"User-Agent": "OpenSH"})
+        with urllib.request.urlopen(req, timeout=3) as response:
+            data = json.loads(response.read().decode('utf-8'))
+            latest = data.get("tag_name", "").lstrip("v")
+            if latest and latest != __version__:
+                print(f"\033[33m📦 New version available: v{latest} (you have v{__version__})\033[0m")
+                print(f"\033[90m   Update: https://github.com/ai-dev-2024/OpenSH/releases/tag/v{latest}\033[0m\n")
+    except:
+        pass  # Silently fail - don't block startup
+
 def exit_handler(sig, frame):
     print()
     raise InterruptedError()
@@ -543,6 +557,9 @@ def main():
         except Exception as e:
             print(f"\033[31mError: {e}\033[0m")
         return
+    
+    # Check for updates (silent, non-blocking)
+    check_for_updates()
     
     print("\033[1mOpenSH\033[0m ready! Type naturally or use !help\n")
     
