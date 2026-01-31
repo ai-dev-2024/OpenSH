@@ -42,6 +42,10 @@
 | 📁 **Context-Aware** | Sees your files and folders to generate accurate commands |
 | 🆓 **100% Free** | Uses Groq or Gemini free API tier - no paid subscription needed |
 
+> **Platform Status:**  
+> ✅ **Windows** - Fully tested and working  
+> ⚠️ **macOS/Linux** - Should work but untested - feedback welcome!
+
 ---
 
 ## 🎬 How It Works
