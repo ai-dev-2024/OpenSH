@@ -4,29 +4,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpenSH - Natural Language Shell</title>
+    <title>OpenSH - The AI-Powered Natural Language Shell</title>
     <meta name="description"
-        content="Talk to your terminal in plain English. Stop memorizing commands. Works on Windows, macOS, and Linux.">
-    <meta name="keywords" content="terminal, shell, natural language, AI, command line, PowerShell, bash">
-    <meta property="og:title" content="OpenSH - Natural Language Shell">
-    <meta property="og:description" content="Talk to your terminal in plain English">
+        content="Talk to your terminal in plain English. Cross-platform (Windows, macOS, Linux). Free & Open Source.">
+    <meta property="og:title" content="OpenSH - AI Shell Assistant">
+    <meta property="og:description" content="Forget memorizing commands. Just say what you want.">
+    <meta property="og:image" content="https://opensh.vercel.app/og-image.png">
     <meta property="og:url" content="https://opensh.vercel.app">
-    <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
         rel="stylesheet">
+
     <style>
         :root {
-            --bg: #0a0a0f;
-            --bg-card: #12121a;
-            --text: #f0f0f0;
-            --text-muted: #8b8b9b;
-            --accent: #6366f1;
-            --accent-hover: #818cf8;
-            --green: #22c55e;
-            --yellow: #eab308;
-            --gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+            --bg: #030014;
+            --bg-glass: rgba(10, 10, 20, 0.7);
+            --primary: #8b5cf6;
+            --primary-glow: #7c3aed;
+            --secondary: #ec4899;
+            --text: #ffffff;
+            --text-dim: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --gradient-heading: linear-gradient(to right, #c084fc, #ec4899);
         }
 
         * {
@@ -36,461 +40,473 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background: var(--bg);
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
             color: var(--text);
             line-height: 1.6;
             overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.15), transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(236, 72, 153, 0.1), transparent 40%);
         }
 
-        /* Hero */
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 2rem;
-            position: relative;
-        }
-
-        .hero::before {
-            content: '';
+        /* Ambient Glow */
+        .glow-effect {
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(ellipse at top, rgba(99, 102, 241, 0.15) 0%, transparent 50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(124, 58, 237, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: -1;
             pointer-events: none;
         }
 
-        .badge {
-            background: rgba(99, 102, 241, 0.15);
-            border: 1px solid rgba(99, 102, 241, 0.3);
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Navbar */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 0;
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            font-weight: 800;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-item {
+            color: var(--text-dim);
+            text-decoration: none;
+            transition: color 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .nav-item:hover {
+            color: var(--text);
+        }
+
+        .btn-sm {
             padding: 0.5rem 1rem;
-            border-radius: 50px;
-            font-size: 0.875rem;
-            margin-bottom: 1.5rem;
-            color: var(--accent-hover);
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-github-nav {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid var(--border);
+        }
+
+        .btn-github-nav:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Hero Section */
+        header {
+            padding: 6rem 0 4rem;
+            text-align: center;
+            position: relative;
         }
 
         h1 {
-            font-size: clamp(3rem, 10vw, 5rem);
+            font-size: clamp(3rem, 6vw, 5rem);
             font-weight: 800;
-            background: var(--gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 1rem;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
             letter-spacing: -0.02em;
         }
 
-        .tagline {
-            font-size: clamp(1.25rem, 3vw, 1.75rem);
-            color: var(--text-muted);
-            margin-bottom: 2.5rem;
+        .gradient-text {
+            background: var(--gradient-heading);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-dim);
             max-width: 600px;
+            margin: 0 auto 3rem;
         }
 
         /* Terminal Demo */
-        .terminal {
-            background: var(--bg-card);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 1.5rem;
-            max-width: 650px;
-            width: 100%;
+        .terminal-window {
+            background: #1e1e2e;
+            border-radius: 12px;
+            box-shadow: 0 25px 80px -20px rgba(0, 0, 0, 0.7), 0 0 0 1px var(--border);
+            max-width: 800px;
+            margin: 0 auto;
+            overflow: hidden;
             text-align: left;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.9rem;
-            margin-bottom: 3rem;
-            box-shadow: 0 25px 80px -20px rgba(99, 102, 241, 0.3);
+            position: relative;
         }
 
-        .terminal-header {
+        .terminal-bar {
+            background: #27273a;
+            padding: 0.75rem 1rem;
             display: flex;
-            gap: 8px;
-            margin-bottom: 1rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            gap: 0.5rem;
+            border-bottom: 1px solid #353545;
         }
 
-        .dot {
+        .circle {
             width: 12px;
             height: 12px;
             border-radius: 50%;
         }
 
-        .dot.r {
-            background: #ff5f57;
+        .red {
+            background: #ff5f56;
         }
 
-        .dot.y {
-            background: #febc2e;
+        .yellow {
+            background: #ffbd2e;
         }
 
-        .dot.g {
-            background: #28c840;
+        .green {
+            background: #27c93f;
         }
 
-        .line {
-            margin: 0.75rem 0;
-            display: flex;
-            flex-wrap: wrap;
+        .terminal-content {
+            padding: 2rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            color: #dcdcea;
+        }
+
+        .cmd-group {
+            margin-bottom: 2rem;
         }
 
         .prompt {
-            color: var(--green);
-            margin-right: 0.5rem;
+            color: #a9b1d6;
         }
 
-        .cmd {
-            color: var(--text);
+        .input {
+            color: #ff9e64;
+            font-weight: 500;
         }
 
         .output {
-            color: var(--yellow);
+            color: #9ece6a;
+            margin-top: 0.5rem;
+            display: block;
         }
 
         .result {
-            color: var(--text-muted);
-            font-size: 0.85rem;
+            color: #7aa2f7;
+            opacity: 0.8;
+            margin-top: 0.25rem;
+            display: block;
+            font-size: 0.9em;
         }
 
-        /* Install Buttons */
-        .install-section {
+        /* Installation */
+        .install-area {
+            margin-top: 4rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2.5rem;
+            text-align: center;
+        }
+
+        .tabs {
             display: flex;
-            flex-direction: column;
-            align-items: center;
+            justify-content: center;
             gap: 1rem;
             margin-bottom: 2rem;
         }
 
-        .install-label {
-            font-size: 0.875rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
-
-        .install-buttons {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 1rem 1.75rem;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: all 0.2s ease;
-            border: none;
-            cursor: pointer;
-        }
-
-        .btn-windows {
-            background: linear-gradient(135deg, #0078d4 0%, #00bcf2 100%);
-            color: white;
-        }
-
-        .btn-mac {
-            background: linear-gradient(135deg, #333 0%, #555 100%);
-            color: white;
-        }
-
-        .btn-linux {
-            background: linear-gradient(135deg, #dd4814 0%, #f7941e 100%);
-            color: white;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
-        }
-
-        .btn-github {
+        .tab-btn {
             background: transparent;
-            border: 2px solid rgba(255, 255, 255, 0.2);
+            border: none;
+            color: var(--text-dim);
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: rgba(255, 255, 255, 0.1);
             color: var(--text);
         }
 
-        .btn-github:hover {
-            border-color: var(--accent);
-            background: rgba(99, 102, 241, 0.1);
-        }
-
-        /* Features */
-        .features {
-            padding: 6rem 2rem;
-            background: linear-gradient(180deg, transparent 0%, rgba(99, 102, 241, 0.05) 100%);
-        }
-
-        .features h2 {
-            text-align: center;
-            font-size: 2.5rem;
-            margin-bottom: 3rem;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        .feature {
-            background: var(--bg-card);
-            padding: 2rem;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .feature-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .feature h3 {
-            font-size: 1.25rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .feature p {
-            color: var(--text-muted);
-        }
-
-        /* Install Commands */
-        .install-commands {
-            padding: 4rem 2rem;
-            text-align: center;
-        }
-
-        .install-commands h2 {
-            font-size: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .command-box {
-            background: var(--bg-card);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 1.5rem;
-            max-width: 700px;
-            margin: 1rem auto;
+        .code-block {
+            background: #000;
+            padding: 1.25rem;
+            border-radius: 8px;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.9rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 1rem;
+            color: #4ade80;
+            border: 1px solid var(--border);
+            position: relative;
+            max-width: 700px;
+            margin: 0 auto;
+            text-align: left;
+            overflow-x: auto;
+            display: none;
         }
 
-        .command-box code {
-            color: var(--green);
-            word-break: break-all;
+        .code-block.active {
+            display: block;
         }
 
         .copy-btn {
-            background: var(--accent);
+            float: right;
+            background: var(--primary);
             color: white;
             border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
             cursor: pointer;
-            font-size: 0.875rem;
-            white-space: nowrap;
+            transform: translateY(-2px);
         }
 
         .copy-btn:hover {
-            background: var(--accent-hover);
+            background: var(--primary-glow);
         }
 
-        .platform-label {
-            color: var(--text-muted);
-            font-size: 0.875rem;
-            margin-bottom: 0.5rem;
+        /* Features Grid */
+        .features {
+            padding: 5rem 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
         }
 
-        /* Footer */
-        .footer {
-            padding: 4rem 2rem;
-            text-align: center;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .footer p {
-            color: var(--text-muted);
-            margin-bottom: 1rem;
-        }
-
-        .footer a {
-            color: var(--accent);
-            text-decoration: none;
-        }
-
-        .footer a:hover {
-            text-decoration: underline;
-        }
-
-        .kofi-btn {
-            display: inline-block;
-            margin-top: 1.5rem;
-        }
-
-        .kofi-btn img {
-            height: 40px;
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 2rem;
+            border-radius: 12px;
             transition: transform 0.2s;
         }
 
-        .kofi-btn:hover img {
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+
+        .icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .feature-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: white;
+        }
+
+        .feature-desc {
+            color: var(--text-dim);
+        }
+
+        /* Footer & Support */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 4rem 0;
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        .kofi-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: #FF5E5B;
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 2rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-top: 2rem;
+            box-shadow: 0 4px 15px rgba(255, 94, 91, 0.4);
+            transition: transform 0.2s;
+        }
+
+        .kofi-button:hover {
             transform: scale(1.05);
         }
 
-        @media (max-width: 600px) {
-            .terminal {
-                font-size: 0.8rem;
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 3rem;
+            }
+
+            .terminal-content {
                 padding: 1rem;
-            }
-
-            .btn {
-                padding: 0.875rem 1.25rem;
                 font-size: 0.9rem;
-            }
-
-            .command-box {
-                flex-direction: column;
-                text-align: left;
             }
         }
     </style>
 </head>
 
 <body>
-    <section class="hero">
-        <span class="badge">✨ 100% Free • No Subscription</span>
-        <h1>OpenSH</h1>
-        <p class="tagline">Talk to your terminal in plain English.<br>Stop memorizing commands.</p>
+    <div class="glow-effect"></div>
 
-        <div class="terminal">
-            <div class="terminal-header">
-                <div class="dot r"></div>
-                <div class="dot y"></div>
-                <div class="dot g"></div>
+    <nav class="container">
+        <a href="#" class="brand">🚀 OpenSH</a>
+        <div class="nav-links">
+            <a href="https://github.com/ai-dev-2024/OpenSH" target="_blank" class="btn-sm btn-github-nav">GitHub</a>
+        </div>
+    </nav>
+
+    <header class="container">
+        <div class="badge"
+            style="display:inline-block; padding:0.5rem 1rem; background:rgba(255,255,255,0.05); border-radius:50px; border:1px solid var(--border); margin-bottom:1.5rem; font-size:0.9rem; color:#c084fc;">
+            v0.2.0 • Cross-Platform • Free
+        </div>
+        <h1>
+            Your Terminal,<br>
+            <span class="gradient-text">Conversational.</span>
+        </h1>
+        <p class="subtitle">
+            Say goodbye to complex syntax. OpenSH translates natural English into native shell commands instantly.
+        </p>
+
+        <div class="terminal-window">
+            <div class="terminal-bar">
+                <div class="circle red"></div>
+                <div class="circle yellow"></div>
+                <div class="circle green"></div>
             </div>
-            <div class="line">
-                <span class="prompt">C:\Users\You ></span>
-                <span class="cmd">find all large files over 100MB</span>
-            </div>
-            <div class="line">
-                <span class="output">→ Get-ChildItem -Recurse | Where-Object {$_.Length -gt 100MB}</span>
-            </div>
-            <div class="line">
-                <span class="result">📁 backup.zip (245 MB) 📁 video.mp4 (1.2 GB)</span>
+            <div class="terminal-content">
+                <div class="cmd-group">
+                    <div class="prompt">PS C:\Users\Muhib > <span class="input">find all python files over 1mb</span>
+                    </div>
+                    <div class="output">→ Get-ChildItem -Recurse -Filter "*.py" | Where-Object {$_.Length -gt 1MB}</div>
+                    <div class="result">
+                        app.py (2.4 MB)<br>
+                        model.py (15.1 MB)
+                    </div>
+                </div>
+                <div class="cmd-group">
+                    <div class="prompt">PS C:\Users\Muhib > <span class="input">create a new react app called
+                            dashboard</span></div>
+                    <div class="output">→ npx create-react-app dashboard</div>
+                    <div class="result">Creating a new React app in C:\Users\Muhib\dashboard...</div>
+                </div>
             </div>
         </div>
+    </header>
 
-        <div class="install-section">
-            <span class="install-label">One-Click Install</span>
-            <div class="install-buttons">
-                <a href="https://github.com/ai-dev-2024/OpenSH#windows-powershell" class="btn btn-windows">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                        <path
-                            d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801" />
-                    </svg>
-                    Windows
-                </a>
-                <a href="https://github.com/ai-dev-2024/OpenSH#macos--linux" class="btn btn-mac">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                        <path
-                            d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
-                    </svg>
-                    macOS
-                </a>
-                <a href="https://github.com/ai-dev-2024/OpenSH#macos--linux" class="btn btn-linux">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                        <path
-                            d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489a.424.424 0 00-.11.135c-.26.268-.45.6-.663.839-.199.199-.485.267-.797.4-.313.136-.658.269-.864.68-.09.189-.136.394-.132.602 0 .199.027.4.055.536.058.399.116.728.04.97-.249.68-.28 1.145-.106 1.484.174.334.535.47.94.601.81.2 1.91.135 2.774.6.926.466 1.866.67 2.616.47.526-.116.97-.464 1.208-.946.587-.003 1.23-.269 2.26-.334.699-.058 1.574.267 2.577.2.025.134.063.198.114.333l.003.003c.391.778 1.113 1.132 1.884 1.071.771-.06 1.592-.536 2.257-1.306.631-.765 1.683-1.084 2.378-1.503.348-.199.629-.469.649-.853.023-.4-.2-.811-.714-1.376v-.097l-.003-.003c-.17-.2-.25-.535-.338-.926-.085-.401-.182-.786-.492-1.046h-.003c-.059-.054-.123-.067-.188-.135a.357.357 0 00-.19-.064c.431-1.278.264-2.55-.173-3.694-.533-1.41-1.465-2.638-2.175-3.483-.796-1.005-1.576-1.957-1.56-3.368.026-2.152.236-6.133-3.544-6.139zm.529 3.405h.013c.213 0 .396.062.584.198.19.135.33.332.438.533.105.259.158.459.166.724 0-.02.006-.04.006-.06v.105a.086.086 0 01-.004-.021l-.004-.024a1.807 1.807 0 01-.15.706.953.953 0 01-.213.335.71.71 0 00-.088-.042c-.104-.045-.198-.064-.284-.133a1.312 1.312 0 00-.22-.066c.05-.06.146-.133.183-.198.053-.128.082-.264.088-.402v-.02a1.21 1.21 0 00-.061-.4c-.045-.134-.101-.2-.183-.333-.084-.066-.167-.132-.267-.132h-.016c-.093 0-.176.03-.262.132a.8.8 0 00-.205.334 1.18 1.18 0 00-.09.4v.019c.002.089.008.179.02.267-.193-.067-.438-.135-.607-.202a1.635 1.635 0 01-.018-.2v-.02a1.772 1.772 0 01.15-.768c.082-.22.232-.406.43-.534a.985.985 0 01.594-.2zm-2.962.059h.036c.142 0 .27.048.399.135.146.129.264.288.344.465.09.199.14.4.153.667v.004c.007.134.006.2-.002.266v.08c-.03.007-.056.018-.083.024-.152.055-.274.135-.393.2.012-.09.013-.18.003-.267v-.015c-.012-.133-.04-.2-.082-.333a.613.613 0 00-.166-.267.248.248 0 00-.183-.064h-.021c-.071.006-.13.04-.186.132a.552.552 0 00-.12.27.944.944 0 00-.023.33v.015c.012.135.037.2.08.334.046.134.098.2.166.268.01.009.02.018.034.024-.07.057-.117.07-.176.136a.304.304 0 01-.131.068 2.62 2.62 0 01-.275-.402 1.772 1.772 0 01-.155-.667 1.759 1.759 0 01.08-.668 1.43 1.43 0 01.283-.535c.128-.133.26-.2.418-.2zm1.37 1.706c.332 0 .733.065 1.216.399.293.2.523.269 1.052.468h.003c.255.136.405.266.478.399v-.131a.571.571 0 01.016.47c-.123.31-.516.643-1.063.842v.002c-.268.135-.501.333-.775.465-.276.135-.588.292-1.012.267a1.139 1.139 0 01-.448-.067 3.566 3.566 0 01-.322-.198c-.195-.135-.363-.332-.612-.465v-.005h-.005c-.4-.246-.616-.512-.686-.71-.07-.268-.005-.47.193-.6.224-.135.38-.271.483-.336.104-.074.143-.102.176-.131h.002v-.003c.169-.202.436-.47.839-.601.139-.036.294-.065.466-.065zm2.8 2.142c.358 1.417 1.196 3.475 1.735 4.473.286.534.855 1.659 1.102 3.024.156-.005.33.018.513.064.646-1.671-.546-3.467-1.089-3.966-.22-.2-.232-.335-.123-.335.59.534 1.365 1.572 1.646 2.757.13.535.16 1.104.021 1.67.067.028.135.06.205.067 1.032.534 1.413.938 1.23 1.537v-.043c-.06-.003-.12 0-.18 0h-.016c.151-.467-.182-.825-1.065-1.224-.915-.4-1.646-.336-1.77.465-.008.043-.013.066-.018.135-.068.023-.139.053-.209.064-.43.268-.662.669-.793 1.187-.13.533-.17 1.156-.205 1.869v.003c-.02.334-.17.838-.319 1.35-1.5 1.072-3.58 1.538-5.348.334a2.645 2.645 0 00-.402-.533 1.45 1.45 0 00-.275-.333c.182 0 .338-.03.465-.067a.615.615 0 00.314-.334c.108-.267 0-.697-.345-1.163-.345-.467-.931-.995-1.788-1.521-.63-.4-.986-.87-1.15-1.396-.165-.534-.143-1.085-.015-1.645.245-1.07.873-2.11 1.274-2.763.107-.065.037.135-.408.974-.396.751-1.14 2.497-.122 3.854a8.123 8.123 0 01.647-2.876c.564-1.278 1.743-3.504 1.836-5.268.048.036.217.135.289.202.218.133.38.333.59.465.21.201.477.335.876.335.039.003.075.006.11.006.412 0 .73-.134.997-.268.29-.134.52-.334.74-.4h.005c.467-.135.835-.402 1.044-.7zm2.185 8.958c.037.6.343 1.245.882 1.377.588.134 1.434-.333 1.791-.765l.211-.01c.315-.007.577.01.847.268l.003.003c.208.199.305.53.391.876.085.4.154.78.409 1.066.486.527.645.906.636 1.14l.003-.007v.018l-.003-.012c-.015.262-.185.396-.498.595-.63.401-1.746.712-2.457 1.57-.618.737-1.37 1.14-2.036 1.191-.664.053-1.237-.2-1.574-.898l-.005-.003c-.21-.4-.12-1.025.056-1.69.176-.668.428-1.344.463-1.897.037-.714.076-1.335.195-1.814.117-.468.32-.753.659-.92.09-.023.163-.04.247-.058zm-3.509.038c.018.013.033.027.05.04.02.015.06.043.1.07l-.205.028-.09.037c.04-.026.08-.06.11-.09l.035-.085z" />
-                    </svg>
-                    Linux
-                </a>
+    <main class="container">
+        <section class="install-area">
+            <h2 style="font-size:2rem; margin-bottom:0.5rem;">Install in Seconds</h2>
+            <p style="color:var(--text-dim); margin-bottom:2rem;">Auto-updates supported.</p>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('win')">Windows</button>
+                <button class="tab-btn" onclick="switchTab('mac')">macOS / Linux</button>
+            </div>
+
+            <div id="win-code" class="code-block active">
+                irm https://raw.githubusercontent.com/ai-dev-2024/OpenSH/main/install.ps1 | iex
+                <button class="copy-btn"
+                    onclick="copyToClip('irm https://raw.githubusercontent.com/ai-dev-2024/OpenSH/main/install.ps1 | iex')">Copy</button>
+            </div>
+
+            <div id="mac-code" class="code-block">
+                curl -fsSL https://raw.githubusercontent.com/ai-dev-2024/OpenSH/main/install.sh | bash
+                <button class="copy-btn"
+                    onclick="copyToClip('curl -fsSL https://raw.githubusercontent.com/ai-dev-2024/OpenSH/main/install.sh | bash')">Copy</button>
+            </div>
+        </section>
+
+        <div class="features">
+            <div class="feature-card">
+                <span class="icon">🌍</span>
+                <h3 class="feature-title">Native Cross-Platform</h3>
+                <p class="feature-desc">Translates to PowerShell on Windows, and Bash/Zsh on macOS and Linux. It knows
+                    where it lives.</p>
+            </div>
+            <div class="feature-card">
+                <span class="icon">🧠</span>
+                <h3 class="feature-title">Context Aware</h3>
+                <p class="feature-desc">OpenSH sees your current directory structure, so it knows exactly which files
+                    you're referring to.</p>
+            </div>
+            <div class="feature-card">
+                <span class="icon">⚡</span>
+                <h3 class="feature-title">Auto-Execute & Learn</h3>
+                <p class="feature-desc">See the command before it runs. Validates safety, then executes. Great for
+                    learning CLI.</p>
             </div>
         </div>
+    </main>
 
-        <a href="https://github.com/ai-dev-2024/OpenSH" class="btn btn-github">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path
-                    d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-            </svg>
-            View on GitHub
-        </a>
-    </section>
+    <footer>
+        <div class="container">
+            <h3>Support Development</h3>
+            <p style="color:var(--text-dim); margin-top:0.5rem;">OpenSH is 100% free and open-source.</p>
 
-    <section class="features">
-        <h2>Why OpenSH?</h2>
-        <div class="features-grid">
-            <div class="feature">
-                <div class="feature-icon">🧠</div>
-                <h3>Natural Language</h3>
-                <p>Just describe what you want. No more googling "how to find files in PowerShell".</p>
-            </div>
-            <div class="feature">
-                <div class="feature-icon">⚡</div>
-                <h3>Learn as You Go</h3>
-                <p>See the real command before it runs. You'll naturally learn the commands over time.</p>
-            </div>
-            <div class="feature">
-                <div class="feature-icon">🌍</div>
-                <h3>Cross-Platform</h3>
-                <p>Windows (tested), macOS and Linux (community testing welcome).</p>
-            </div>
-            <div class="feature">
-                <div class="feature-icon">🆓</div>
-                <h3>100% Free</h3>
-                <p>Uses Groq or Gemini's free API tier. No subscriptions, no hidden costs.</p>
+            <a href="https://ko-fi.com/ai_dev_2024" target="_blank" class="kofi-button">
+                <img src="https://storage.ko-fi.com/cdn/cup-border.png" alt="" style="width:20px;">
+                Buy me a Coffee
+            </a>
+
+            <div
+                style="margin-top:3rem; padding-top:2rem; border-top:1px solid var(--border); color:var(--text-dim); font-size:0.9rem;">
+                © 2024 OpenSH Project. MIT License.
             </div>
         </div>
-    </section>
-
-    <section class="install-commands">
-        <h2>Quick Install Commands</h2>
-
-        <p class="platform-label">Windows (PowerShell)</p>
-        <div class="command-box">
-            <code id="cmd-win">irm https://raw.githubusercontent.com/ai-dev-2024/OpenSH/main/install.ps1 | iex</code>
-            <button class="copy-btn" onclick="copyCmd('cmd-win')">Copy</button>
-        </div>
-
-        <p class="platform-label" style="margin-top: 2rem;">macOS / Linux</p>
-        <div class="command-box">
-            <code
-                id="cmd-unix">curl -fsSL https://raw.githubusercontent.com/ai-dev-2024/OpenSH/main/install.sh | bash</code>
-            <button class="copy-btn" onclick="copyCmd('cmd-unix')">Copy</button>
-        </div>
-    </section>
-
-    <footer class="footer">
-        <p>Made with ❤️ by <a href="https://github.com/ai-dev-2024">AI Dev 2024</a></p>
-        <p>Open source under <a href="https://github.com/ai-dev-2024/OpenSH/blob/main/LICENSE">MIT License</a></p>
-        <a href="https://ko-fi.com/ai_dev_2024" class="kofi-btn">
-            <img src="https://storage.ko-fi.com/cdn/kofi2.png?v=3" alt="Support on Ko-fi">
-        </a>
     </footer>
 
     <script>
-        function copyCmd(id) {
-            const text = document.getElementById(id).textContent;
+        function switchTab(platform) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.code-block').forEach(c => c.classList.remove('active'));
+
+            if (platform === 'win') {
+                document.querySelector('button[onclick="switchTab(\'win\')"]').classList.add('active');
+                document.getElementById('win-code').classList.add('active');
+            } else {
+                document.querySelector('button[onclick="switchTab(\'mac\')"]').classList.add('active');
+                document.getElementById('mac-code').classList.add('active');
+            }
+        }
+
+        function copyToClip(text) {
             navigator.clipboard.writeText(text);
-            event.target.textContent = 'Copied!';
-            setTimeout(() => event.target.textContent = 'Copy', 2000);
+            const btn = event.target;
+            const originalText = btn.innerText;
+            btn.innerText = 'Copied!';
+            setTimeout(() => btn.innerText = originalText, 2000);
         }
     </script>
 </body>
