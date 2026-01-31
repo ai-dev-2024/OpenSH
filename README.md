@@ -1,20 +1,29 @@
-# 🚀 OpenSH - Open Natural Language Shell
+# 🚀 OpenSH - Natural Language Shell
 
 <div align="center">
 
-![OpenSH Banner](https://img.shields.io/badge/OpenSH-Natural%20Language%20Shell-4285F4?style=for-the-badge&logo=google&logoColor=white)
+<!-- Banner -->
+![OpenSH](https://img.shields.io/badge/🚀_OpenSH-Natural_Language_Shell-667eea?style=for-the-badge&labelColor=764ba2)
 
-[![Version](https://img.shields.io/badge/version-0.1.1-blue?style=flat-square)](CHANGELOG.md)
-[![Windows](https://img.shields.io/badge/Windows-0078D6?style=flat-square&logo=windows&logoColor=white)](https://github.com/ai-dev-2024/OpenSH)
-[![macOS](https://img.shields.io/badge/macOS-000000?style=flat-square&logo=apple&logoColor=white)](https://github.com/ai-dev-2024/OpenSH)
-[![Linux](https://img.shields.io/badge/Linux-FCC624?style=flat-square&logo=linux&logoColor=black)](https://github.com/ai-dev-2024/OpenSH)
+[![Version](https://img.shields.io/badge/version-0.2.0-blue?style=flat-square)](CHANGELOG.md)
+[![Windows](https://img.shields.io/badge/Windows-0078D6?style=flat-square&logo=windows&logoColor=white)](#-installation)
+[![macOS](https://img.shields.io/badge/macOS-000000?style=flat-square&logo=apple&logoColor=white)](#-installation)
+[![Linux](https://img.shields.io/badge/Linux-FCC624?style=flat-square&logo=linux&logoColor=black)](#-installation)
 [![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](LICENSE)
 [![CI](https://github.com/ai-dev-2024/OpenSH/actions/workflows/ci.yml/badge.svg)](https://github.com/ai-dev-2024/OpenSH/actions)
 
-**Talk to your terminal in plain English.**
+### 💬 Talk to your terminal in plain English
 
-[Features](#-features) • [Installation](#-installation) • [Usage](#-usage) • [Changelog](CHANGELOG.md) • [Support](#-support)
+**Stop memorizing commands. Just describe what you want.**
+
+[Features](#-features) • [Quick Start](#-quick-start) • [Examples](#-examples) • [Support](#-support)
+
+---
+
+<a href="https://ko-fi.com/ai_dev_2024">
+  <img src="https://img.shields.io/badge/☕_Support_this_project-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Ko-fi"/>
+</a>
 
 </div>
 
@@ -22,18 +31,36 @@
 
 ## ✨ Features
 
-- 🌍 **Multi-Platform** - Works on Windows, macOS, and Linux
-- 🤖 **AI-Powered** - Uses Google Gemini to understand natural language
-- ⚡ **Smart Detection** - Recognizes shell commands and runs them directly
-- 🔄 **Context-Aware** - Remembers your command history for better suggestions
-- 💻 **Platform-Native** - Generates PowerShell on Windows, bash/zsh on Unix
+| Feature | Description |
+|---------|-------------|
+| 🧠 **Natural Language** | Type what you want in plain English - no command memorization needed |
+| ⚡ **Auto-Execute** | Commands run automatically - see the translation, learn as you go |
+| 🌍 **Cross-Platform** | Works on Windows, macOS, and Linux with platform-native commands |
+| 🚀 **Auto-Start** | Opens automatically with every new terminal (configurable) |
+| 📁 **Context-Aware** | Sees your files and folders to generate accurate commands |
+| 🆓 **100% Free** | Uses Groq or Gemini free API tier - no paid subscription needed |
 
-## 📦 Installation
+---
+
+## 🎬 How It Works
+
+```
+You type:  "show all python files on desktop"
+    ↓
+OpenSH:    → Get-ChildItem "$env:USERPROFILE\Desktop" -Filter "*.py"
+    ↓
+Output:    (files listed...)
+```
+
+**You learn the real commands while getting work done!**
+
+---
+
+## 📦 Quick Start
 
 ### Prerequisites
-
 - **Python 3.8+** installed
-- A **free Google Gemini API key** from [Google AI Studio](https://aistudio.google.com/apikey)
+- Free API key from [Groq](https://console.groq.com) (recommended) or [Google AI Studio](https://aistudio.google.com/apikey)
 
 ### Windows (PowerShell)
 
@@ -52,7 +79,7 @@ bash install.sh
 ```
 
 <details>
-<summary><b>One-liner install (after GitHub release)</b></summary>
+<summary><b>🚀 One-liner install</b></summary>
 
 **Windows:**
 ```powershell
@@ -66,59 +93,65 @@ curl -fsSL https://raw.githubusercontent.com/ai-dev-2024/OpenSH/main/install.sh 
 
 </details>
 
-## 🚀 Usage
+---
 
-```bash
-opsh
-```
+## 💡 Examples
 
-On first run, you'll be prompted to enter your **free Gemini API key**.
+### File Operations
+| You say | OpenSH runs |
+|---------|-------------|
+| `show all python files` | `Get-ChildItem -Recurse -Filter "*.py"` |
+| `find large files over 100MB` | `Get-ChildItem -Recurse \| Where-Object {$_.Length -gt 100MB}` |
+| `delete all temp files` | `Remove-Item *.tmp` |
+| `copy resume to desktop` | `Copy-Item resume.pdf $env:USERPROFILE\Desktop` |
 
-### Natural Language Examples
+### Navigation
+| You say | OpenSH runs |
+|---------|-------------|
+| `go to the desktop` | `Set-Location "$env:USERPROFILE\Desktop"` |
+| `what folder am I in` | `Get-Location` |
+| `show what's in this folder` | `Get-ChildItem` |
 
-| You type | OpenSH generates |
-|----------|------------------|
-| `list all python files` | `Get-ChildItem *.py` (Win) / `find . -name "*.py"` (Unix) |
-| `show disk space` | `Get-PSDrive C` (Win) / `df -h` (Unix) |
-| `git commit with message fixed bug` | `git commit -m "fixed bug"` |
-| `find large files over 100MB` | Appropriate command for your OS |
+### System
+| You say | OpenSH runs |
+|---------|-------------|
+| `show running processes` | `Get-Process` |
+| `how much disk space` | `Get-PSDrive C` |
+| `what's my IP address` | `ipconfig` |
 
-### Commands
+### Git
+| You say | OpenSH runs |
+|---------|-------------|
+| `commit with message fixed bug` | `git commit -m "fixed bug"` |
+| `push to main` | `git push origin main` |
+| `show recent commits` | `git log -n 5 --oneline` |
+
+---
+
+## ⌨️ Commands
 
 | Command | Description |
 |---------|-------------|
-| `!auth` | Change authentication/API key |
-| `!version` | Show version info |
+| `!auth` | Change API provider/key |
 | `!help` | Show help |
 | `!credits` | Show credits |
-| `!<cmd>` | Run command directly |
+| `!<cmd>` | Run command directly (bypass AI) |
 | `exit` | Exit OpenSH |
-| `Ctrl+C` | Exit OpenSH |
 
-### Quick Mode (from any terminal)
+---
 
-After setup, use `ask` from any terminal:
+## 🔧 Configuration
+
+After installation, OpenSH **auto-starts** with every new terminal. To disable:
+
+**Windows:** Remove the OpenSH section from your PowerShell profile:
 ```powershell
-ask "show all python files"
-ask "find large files"
-ask "git status"
+notepad $PROFILE
 ```
 
-## 🔧 How It Works
+**Linux/macOS:** Remove from `~/.bashrc` or `~/.zshrc`
 
-```
-┌─────────────┐     ┌──────────────┐     ┌─────────────┐
-│  You type   │ ──► │   Gemini AI  │ ──► │   Command   │
-│  naturally  │     │  translates  │     │   executes  │
-└─────────────┘     └──────────────┘     └─────────────┘
-```
-
-1. Type a natural language request
-2. OpenSH sends it to Gemini AI with platform context
-3. Review the suggested command
-4. Press Enter to execute (or type something else to cancel)
-
-**Note:** Direct shell commands (like `cd`, `ls`, `dir`, `git`) bypass AI and run immediately.
+---
 
 ## 🗑️ Uninstall
 
@@ -136,20 +169,29 @@ bash uninstall.sh
 
 ## 💖 Support
 
-If you find OpenSH useful, consider supporting the project:
+If OpenSH saves you time, consider supporting the project:
 
 <a href="https://ko-fi.com/ai_dev_2024">
   <img src="https://img.shields.io/badge/☕_Buy_me_a_coffee-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Ko-fi"/>
 </a>
 
+**Other ways to support:**
+- ⭐ Star this repository
+- 🐛 Report bugs or suggest features
+- 📢 Share with friends
+
 ---
 
 ## 📜 Credits
 
-OpenSH is based on [**nlsh**](https://github.com/junaid-mahmood/nlsh) by Junaid Mahmood.
+OpenSH is inspired by [**nlsh**](https://github.com/junaid-mahmood/nlsh) by Junaid Mahmood.
 
 ---
 
 <div align="center">
-<sub>Made with ❤️ for the command line</sub>
+
+**Made with ❤️ for people who hate memorizing commands**
+
+[![GitHub stars](https://img.shields.io/github/stars/ai-dev-2024/OpenSH?style=social)](https://github.com/ai-dev-2024/OpenSH)
+
 </div>

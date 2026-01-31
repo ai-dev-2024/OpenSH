@@ -8,9 +8,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned
-- Auto-execute mode (`-y` flag)
-- Command aliases
 - Customizable AI model selection
+- Command aliases
+
+---
+
+## [0.2.0] - 2026-01-31
+
+### Added
+- **Groq API support** - Faster free alternative to Gemini (30 req/min)
+- **Auto-execute mode** - Commands run automatically, no Enter needed
+- **Thinking indicator** - Shows `⏳ thinking...` while AI processes
+- **Full path prompt** - Shows complete directory path like default terminal
+- **File context** - AI sees your files for more accurate commands
+- **Cross-platform release workflow** - GitHub Actions for Windows/Linux/macOS
+
+### Fixed
+- `Set-Location` and `chdir` commands now properly change directory
+- Output display issues on Windows
+- Rate limit handling with auto-retry
+
+### Changed
+- Switched from confirmation prompt to auto-execute
+- Improved natural language understanding with larger model
+- Simplified CI tests to avoid Windows encoding issues
 
 ---
 
@@ -26,9 +47,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed Google OAuth (was blocked by Google's unverified app policy)
 - Simplified to API key only - more reliable
 
-### Changed
-- Setup now opens browser automatically for easier API key creation
-
 ---
 
 ## [0.1.0] - 2026-01-30
@@ -38,44 +56,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `!auth` command to change API key anytime
 - JSON-based config storage for auth preferences
 
-### Changed
-- Version bump to 0.1.0 (significant new feature)
-- Improved first-run experience with welcome message
-- Renamed `!api` to `!auth` for clarity
-
----
-
-## [0.0.2] - 2026-01-30
-
-### Added
-- **Authentication menu** - Choose between API key and Google OAuth (API key works now, OAuth coming soon)
-- **google-auth-oauthlib** dependency for future OAuth support
-- **Improved first-run experience** with cleaner setup flow
-
-### Security
-- Added `.auth_method`, `.google_creds.pickle`, and `client_secret.json` to `.gitignore`
-- Credentials are never committed to the repository
-
 ---
 
 ## [0.0.1] - 2026-01-30
 
 ### Added
 - **Multi-platform support** - Works on Windows, macOS, and Linux
-- **Cross-platform Python script** (`opsh.py`) with platform detection
-- **Windows PowerShell installer** (`install.ps1`)
-- **Unix bash installer** (`install.sh`)
 - **AI-powered command translation** using Google Gemini API
-- **Smart command detection** - 50+ shell commands bypass AI for direct execution
+- **Smart command detection** - Shell commands bypass AI for direct execution
 - **Command history context** - AI uses recent commands for better suggestions
-- **Session statistics** - Shows commands run and session duration on exit
-- **Built-in commands**:
-  - `!api` - Change/update Gemini API key
-  - `!version` - Show version and platform info
-  - `!credits` - Show attribution and support links
-  - `!help` - Show available commands
-  - `!uninstall` - Remove OpenSH
-  - `exit` / `quit` / `bye` - Exit with session summary
 - **GitHub Actions CI** - Automated testing on Windows, macOS, Linux
 
 ### Credits
@@ -87,15 +76,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date | Description |
 |---------|------|-------------|
-| 0.1.1 | 2026-01-30 | Quick query mode, `ask` function, simplified auth |
+| 0.2.0 | 2026-01-31 | Groq support, auto-execute, cross-platform releases |
+| 0.1.1 | 2026-01-30 | Quick query mode, simplified auth |
 | 0.1.0 | 2026-01-30 | Auth menu, config storage |
-| 0.0.2 | 2026-01-30 | Authentication improvements |
 | 0.0.1 | 2026-01-30 | Initial multi-platform release |
 
 ---
 
-[Unreleased]: https://github.com/ai-dev-2024/OpenSH/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/ai-dev-2024/OpenSH/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/ai-dev-2024/OpenSH/releases/tag/v0.2.0
 [0.1.1]: https://github.com/ai-dev-2024/OpenSH/releases/tag/v0.1.1
 [0.1.0]: https://github.com/ai-dev-2024/OpenSH/releases/tag/v0.1.0
-[0.0.2]: https://github.com/ai-dev-2024/OpenSH/releases/tag/v0.0.2
 [0.0.1]: https://github.com/ai-dev-2024/OpenSH/releases/tag/v0.0.1
