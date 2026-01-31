@@ -17,7 +17,7 @@
 
 **Stop memorizing commands. Just describe what you want.**
 
-[![Website](https://img.shields.io/badge/🌐_Website-opsh.vercel.app-667eea?style=flat-square)](https://opsh-lemon.vercel.app)
+[![Website](https://img.shields.io/badge/🌐_Website-opensh.vercel.app-667eea?style=flat-square)](https://opensh.vercel.app)
 
 [Features](#-features) • [Quick Start](#-quick-start) • [Examples](#-examples) • [Support](#-support)
 
