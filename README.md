@@ -101,5 +101,5 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ---
 
 <div align="center">
-  <p>Made with ☕ by the AI Dev Team</p>
+  <p>Made with ☕ by the AI Dev Team • © 2026</p>
 </div>
