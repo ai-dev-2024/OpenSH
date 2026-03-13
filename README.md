@@ -8,16 +8,9 @@
 [![Version](https://img.shields.io/github/v/release/ai-dev-2024/OpenSH?style=for-the-badge&color=eab308&labelColor=black)](https://github.com/ai-dev-2024/OpenSH/releases)
 [![License](https://img.shields.io/github/license/ai-dev-2024/OpenSH?style=for-the-badge&color=white&labelColor=black)](LICENSE)
 [![ZAI Community](https://img.shields.io/badge/Part%20of-ZAI%20Start--up%20Community-8b5cf6?style=for-the-badge)](https://startup.z.ai/)
+[![Ko-fi](https://img.shields.io/badge/☕_Support_on_Ko--fi-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white&labelColor=black)](https://ko-fi.com/ai_dev_2024)
 
 **[Installation](#-installation)** • **[Features](#-features)** • **[Configuration](#-configuration)**
-
----
-
-<br>
-
-<a href="https://ko-fi.com/ai_dev_2024">
-  <img src="https://img.shields.io/badge/☕_Support_Development_on_Ko--fi-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white&labelColor=black" height="40" alt="Support on Ko-fi"/>
-</a>
 
 <br>
 <br>
