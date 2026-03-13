@@ -7,6 +7,7 @@
 [![Website](https://img.shields.io/badge/🌐_Website-opensh.vercel.app-eab308?style=for-the-badge&logo=vercel&logoColor=black&labelColor=white)](https://opensh.vercel.app)
 [![Version](https://img.shields.io/github/v/release/ai-dev-2024/OpenSH?style=for-the-badge&color=eab308&labelColor=black)](https://github.com/ai-dev-2024/OpenSH/releases)
 [![License](https://img.shields.io/github/license/ai-dev-2024/OpenSH?style=for-the-badge&color=white&labelColor=black)](LICENSE)
+[![ZAI Community](https://img.shields.io/badge/Part%20of-ZAI%20Start--up%20Community-8b5cf6?style=for-the-badge)](https://startup.z.ai/)
 
 **[Installation](#-installation)** • **[Features](#-features)** • **[Configuration](#-configuration)**
 
