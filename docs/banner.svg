@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="320" viewBox="0 0 1280 320" role="img" aria-labelledby="title desc">
+  <title id="title">OpenSH</title>
+  <desc id="desc">OpenSH: talk to your terminal in plain English. A terminal window turns a plain-English request into a shell command.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0a0a0f"/>
+      <stop offset="0.6" stop-color="#14121a"/>
+      <stop offset="1" stop-color="#241c05"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#fde047"/>
+      <stop offset="1" stop-color="#eab308"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.8" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#eab308" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#eab308" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#ffffff" stroke-opacity="0.035" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="1280" height="320" fill="url(#bg)"/>
+  <rect width="1280" height="320" fill="url(#grid)"/>
+  <rect width="1280" height="320" fill="url(#glow)"/>
+
+  <!-- Title block -->
+  <g font-family="Segoe UI, Helvetica, Arial, sans-serif">
+    <g transform="translate(80,96)">
+      <rect width="64" height="64" rx="14" fill="#111014" stroke="url(#gold)" stroke-width="3"/>
+      <path d="M18 22 L32 32 L18 42" fill="none" stroke="#fde047" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="35" y="40" width="14" height="5" rx="2.5" fill="#fde047"/>
+    </g>
+    <text x="164" y="146" font-size="64" font-weight="700" fill="#f8fafc" letter-spacing="-1">Open<tspan fill="url(#gold)">SH</tspan></text>
+    <text x="82" y="204" font-size="26" fill="#cbd5e1">Talk to your terminal in plain English.</text>
+    <text x="82" y="244" font-size="18" fill="#94a3b8">Groq or Gemini · PowerShell, Bash, Zsh · safety guard</text>
+  </g>
+
+  <!-- Terminal motif -->
+  <g transform="translate(720,58)">
+    <rect width="480" height="204" rx="14" fill="#0d0d12" stroke="#2a2a33" stroke-width="2"/>
+    <path d="M0 14 A14 14 0 0 1 14 0 H466 A14 14 0 0 1 480 14 V36 H0 Z" fill="#17171f"/>
+    <circle cx="24" cy="18" r="6" fill="#ef4444"/>
+    <circle cx="44" cy="18" r="6" fill="#eab308"/>
+    <circle cx="64" cy="18" r="6" fill="#22c55e"/>
+    <text x="240" y="23" font-family="Consolas, Menlo, monospace" font-size="13" fill="#64748b" text-anchor="middle">opsh</text>
+    <g font-family="Consolas, Menlo, monospace" font-size="16" xml:space="preserve">
+      <text x="22" y="72"><tspan fill="#22c55e">~/projects</tspan><tspan fill="#94a3b8"> &gt; </tspan><tspan fill="#e2e8f0">find videos over 1GB</tspan></text>
+      <text x="22" y="98" fill="#e2e8f0">in my downloads</text>
+      <text x="22" y="134" fill="#fde047">→ find ~/Downloads -type f \</text>
+      <text x="22" y="158" fill="#fde047">    -name "*.mp4" -size +1G</text>
+      <text x="22" y="188"><tspan fill="#22c55e">~/projects</tspan><tspan fill="#94a3b8"> &gt; </tspan></text>
+      <rect x="150" y="175" width="10" height="18" fill="#fde047" opacity="0.85"/>
+    </g>
+  </g>
+</svg>

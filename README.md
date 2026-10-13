@@ -1,42 +1,51 @@
 <div align="center">
 
-<img src="docs/assets/banner.svg" alt="OpenSH: talk to your terminal in plain English" width="100%" />
+<img src="docs/banner.svg" alt="OpenSH: talk to your terminal in plain English" width="100%" />
 
-[![CI](https://img.shields.io/github/actions/workflow/status/muhib-karim/OpenSH/ci.yml?branch=main&style=for-the-badge&label=CI&labelColor=black)](https://github.com/muhib-karim/OpenSH/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/muhib-karim/OpenSH?style=for-the-badge&color=eab308&labelColor=black)](https://github.com/muhib-karim/OpenSH/releases/latest)
-[![Website](https://img.shields.io/badge/Website-opensh.vercel.app-eab308?style=for-the-badge&logo=vercel&logoColor=black&labelColor=white)](https://opensh.vercel.app)
-[![License](https://img.shields.io/github/license/muhib-karim/OpenSH?style=for-the-badge&color=white&labelColor=black)](LICENSE)
-[![Python](https://img.shields.io/badge/Python-3.9%E2%80%933.12-3776ab?style=for-the-badge&logo=python&logoColor=white&labelColor=black)](https://www.python.org)
-[![Ko-fi](https://img.shields.io/badge/Support_on_Ko--fi-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white&labelColor=black)](https://ko-fi.com/ai_dev_2024)
+**Talk to your terminal in plain English.**
 
-**[Install](#-install)** · **[Usage](#-usage)** · **[Safety](#%EF%B8%8F-safety)** · **[Configuration](#%EF%B8%8F-configuration)** · **[Architecture](#-architecture)** · **[Development](#-development)**
+[![License: MIT](https://img.shields.io/github/license/muhib-karim/OpenSH)](LICENSE)
+[![Top language](https://img.shields.io/github/languages/top/muhib-karim/OpenSH)](https://github.com/muhib-karim/OpenSH)
+[![CI](https://github.com/muhib-karim/OpenSH/actions/workflows/ci.yml/badge.svg)](https://github.com/muhib-karim/OpenSH/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/muhib-karim/OpenSH)](https://github.com/muhib-karim/OpenSH/releases/latest)
+[![Website](https://img.shields.io/badge/website-opensh.vercel.app-eab308)](https://opensh.vercel.app)
+
+**[Features](#features)** · **[Quick start](#quick-start)** · **[Usage](#usage)** · **[Safety](#safety)** · **[Architecture](#architecture)** · **[Testing](#testing)**
 
 </div>
 
 ## What it is
 
-**OpenSH** turns your terminal into a natural-language shell. Type what you want; OpenSH works out the right command for your OS and shell (PowerShell on Windows, Bash/Zsh on macOS and Linux), shows it, and runs it.
+**OpenSH** (`opsh`) is a natural-language shell. You type what you want, a large language model (Groq or Google Gemini, using your own API key) turns it into one command for your OS and shell (PowerShell on Windows, Bash/Zsh on macOS and Linux), OpenSH prints it, and then runs it. Commands that could destroy data or shut the machine down are held back until you confirm them.
 
 ```text
-~/projects/app > find all video files over 1GB in my downloads folder
+~/projects > find all video files over 1GB in my downloads folder
 → find ~/Downloads -type f \( -name "*.mp4" -o -name "*.mov" -o -name "*.mkv" \) -size +1G
 ```
 
-Plain shell commands (`ls`, `git status`, `docker ps`, …) pass straight through, so it works as your everyday shell too.
+Plain shell commands (`ls`, `git status`, `Get-Process`, …) skip the model and run directly, so you can use it as your everyday shell.
 
-## ✨ Features
+It is a single Python file that uses only the standard library. Provider calls go through `urllib`, so there is no SDK to install.
+
+## Features
 
 | | |
 | :--- | :--- |
-| 🗣️ **Plain English** | Describe the task; get the exact command for your platform. |
-| ⚡ **Auto-run** | Safe commands run immediately; no extra keypress. |
-| 🛡️ **Safety guard** | Commands that delete data, wipe disks, rewrite git history or shut the machine down always ask first. |
-| 🧠 **Context-aware** | Sees the files in the current folder and your recent commands, so "open the resume folder" finds `Current Resume`. |
-| 🔁 **Cross-platform** | Windows (PowerShell), macOS and Linux (Bash/Zsh). |
-| 🔌 **Two providers** | Groq (Llama 3.3 70B, free tier) or Google Gemini 2.0 Flash, your own key. |
-| 📦 **Standalone builds** | Each release ships single-file binaries for Windows, macOS and Linux. |
+| 🗣️ **Plain English to command** | Describe the task and get one command for your platform (`opsh.py: get_command`). |
+| 🔀 **Shell-vs-English classifier** | Known commands and prefixes (`git `, `docker `, `Get-`, `./`, pipes, …) run as typed, with no API call (`is_natural_language`). |
+| 🛡️ **Safety guard** | 26 regex patterns catch recursive deletes, disk formatting, `dd`, shutdown/reboot, force-push and hard reset, `curl \| bash`, `DROP TABLE` and more. Matching commands need an explicit `y` (`is_destructive`, `confirm_if_destructive`). |
+| 🧠 **Context-aware prompts** | The prompt includes the current folder listing, Desktop listing and the last 5 commands with trimmed output, so "open the resume folder" resolves to `Current Resume`. |
+| 🔌 **Two providers** | Groq (`llama-3.3-70b-versatile`) or Gemini (`gemini-2.0-flash`), with automatic retry and backoff on HTTP 429. |
+| 🖥️ **Cross-platform** | Windows (PowerShell, `pyreadline3` optional), macOS and Linux. |
+| 📦 **Installers and binaries** | `install.sh` / `install.ps1` set up `~/.opsh`. The release workflow builds PyInstaller binaries for all 3 OSes on every `v*` tag. |
 
-## 📦 Install
+### Demo
+
+Real output from this repository (`--version`, `--help` and the test suite):
+
+<img src="docs/demo.svg" alt="Terminal output of opsh --version, opsh --help and pytest" width="760" />
+
+## Quick start
 
 **Windows (PowerShell)**
 ```powershell
@@ -48,37 +57,43 @@ irm https://raw.githubusercontent.com/muhib-karim/OpenSH/main/install.ps1 | iex
 curl -fsSL https://raw.githubusercontent.com/muhib-karim/OpenSH/main/install.sh | bash
 ```
 
-The installer puts OpenSH in `~/.opsh/` and adds the `opsh` command to your PATH. Prefer a binary? Download `opsh` for your platform from the [latest release](https://github.com/muhib-karim/OpenSH/releases/latest).
+The installer puts OpenSH in `~/.opsh/` and adds the `opsh` command to your PATH. You can also download a standalone binary from the [latest release](https://github.com/muhib-karim/OpenSH/releases/latest), or run it from source:
+
+```bash
+git clone https://github.com/muhib-karim/OpenSH && cd OpenSH
+python opsh.py            # Python 3.9+; no third-party packages needed
+```
 
 On first run OpenSH asks you to pick a provider and paste an API key ([Groq](https://console.groq.com/keys) or [Gemini](https://aistudio.google.com/apikey)).
 
-To remove it: run `!uninstall` inside OpenSH, or `uninstall.sh` / `uninstall.ps1`.
+To uninstall, run `!uninstall` inside OpenSH, or use `uninstall.sh` / `uninstall.ps1`.
 
-## 🎮 Usage
+## Usage
 
 ```bash
 opsh                                  # interactive shell
 opsh -c "show my public ip address"   # one request, then exit
 opsh -y -c "delete the build folder"  # skip the safety prompt (careful)
 opsh --version
+opsh --help
 ```
 
 Inside the interactive shell:
 
 | Input | What happens |
 | :--- | :--- |
-| `compress the logs folder into a zip` | Translated by the model, shown, then run. |
+| `compress the logs folder into a zip` | Sent to the model; the command is shown, then run. |
 | `git status`, `ls -la`, `Get-Process` | Recognised as a shell command and run as-is. |
-| `!<command>` | Force a raw command, e.g. `!echo hello`. |
-| `cd <path>` | Changes directory (also when the model returns `cd` / `Set-Location`). |
+| `!<command>` | Run a raw command without the model, e.g. `!echo hello`. |
+| `cd <path>` | Changes directory. This also works when the model returns `cd`, `Set-Location` or `chdir`. |
 | `!auth` | Switch provider or replace the API key. |
 | `!version` · `!help` · `!credits` | Info. |
 | `!uninstall` | Remove OpenSH. |
-| `exit` | Quit (shows a short session summary). |
+| `exit` (or Ctrl+D; Ctrl+C on Windows) | Quit and print a session summary (duration and number of commands). On macOS/Linux, Ctrl+C cancels the current line. |
 
-## 🛡️ Safety
+## Safety
 
-Generated commands run automatically **unless** they match the destructive-command guard, which covers, among others:
+Generated commands run automatically **unless** they match the destructive-command guard, which covers:
 
 - recursive or forced deletes: `rm -rf`, `rm -r`, `del /s`, `rd /s`, `Remove-Item -Recurse/-Force`
 - disk-level writes: `mkfs`, `format X:`, `diskpart`, `dd of=…`, redirects into `/dev/sd*`
@@ -88,67 +103,92 @@ Generated commands run automatically **unless** they match the destructive-comma
 - piping a download into a shell: `curl … | bash`, `iwr … | iex`
 - SQL `DROP TABLE/DATABASE`, `TRUNCATE TABLE`
 
-Those are printed in red with a `[y/N]` prompt; anything but `y` skips them. `-y/--yes` disables the prompt for scripted use. The patterns live in `opsh.py` (`_DESTRUCTIVE_PATTERNS`) and are covered by `tests/test_safety.py`.
+Matching commands are printed in red with a `[y/N]` prompt; any answer other than `y`/`yes` (including Ctrl+D) skips them. `-y/--yes` turns the prompt off for scripted use. The patterns live in `opsh.py` (`_DESTRUCTIVE_PATTERNS`) and have both positive and negative test cases in `tests/test_safety.py`.
 
-The guard is a seatbelt, not a sandbox: read the `→` line before you rely on a command in an unfamiliar folder.
+The guard is a seatbelt, not a sandbox. Read the `→` line before trusting a command in an unfamiliar folder. Commands you type yourself (not generated) run as typed.
 
-## ⚙️ Configuration
+## Configuration
 
-OpenSH keeps its settings next to the program (`~/.opsh/` after a normal install):
+OpenSH keeps its settings next to the program (`~/.opsh/` after a normal install). Both files are git-ignored.
 
 | File | Contents |
 | :--- | :--- |
 | `config.json` | `{"provider": "groq"}` or `{"provider": "gemini"}` |
 | `.env` | `GROQ_API_KEY=…` and/or `GEMINI_API_KEY=…` |
 
-`!auth` rewrites both. Keys never leave your machine except in the request to the provider you chose.
+`!auth` rewrites both. Your key is only sent to the provider you chose. On interactive start, OpenSH also makes one anonymous request to the GitHub Releases API to check for a newer version.
 
-## 🏗 Architecture
+## Architecture
 
 ```mermaid
 flowchart LR
-  U[You: plain-English request] --> D{Shell command?}
-  D -->|yes| S[bash / zsh / PowerShell]
-  D -->|no| O[opsh.py prompt builder]
-  O -->|request + OS, shell, folder listing, recent history| L[Groq or Gemini]
-  L -->|one command| G{Destructive?}
+  U[User input] --> B{Built-in?<br/>cd, !auth, !help, exit}
+  B -->|yes| H[Handled in Python]
+  B -->|no| D{is_natural_language?}
+  D -->|shell command or !cmd| S[run_command<br/>bash / zsh / PowerShell]
+  D -->|English| P[get_command<br/>prompt = OS + shell rules<br/>+ folder listing + last 5 commands]
+  P --> L[call_groq / call_gemini<br/>urllib, retry on 429]
+  L -->|one command| G{is_destructive?}
   G -->|no| S
-  G -->|yes| C[Confirm y/N]
+  G -->|yes| C[confirm y/N]
   C -->|y| S
   C -->|N| U
-  S -->|output| U
+  S -->|stdout/stderr| R[print + add_to_history]
+  R --> U
 ```
 
-- **`opsh.py`**: the whole CLI. Platform detection, the shell-vs-English classifier, the prompt (OS and shell rules, current folder listing, last commands), provider calls with rate-limit retry, the safety guard, and the REPL.
-- **`install.sh` / `install.ps1`** and the uninstallers: set up `~/.opsh/` and the `opsh` command.
-- **`.github/workflows/ci.yml`**: syntax, version and unit tests on Windows, macOS and Linux × Python 3.9, 3.11 and 3.12.
-- **`.github/workflows/release.yml`**: on a `v*` tag, builds PyInstaller binaries on all three OSes and publishes them as a GitHub Release.
-- **`docs/`**: the landing page served at [opensh.vercel.app](https://opensh.vercel.app).
+- **`opsh.py`**: the whole CLI. It handles platform detection, the shell-vs-English classifier, prompt building, provider calls with rate-limit retry, the safety guard, history (capped at 10 entries / 4000 chars), config and `.env` handling, the update check, and the REPL.
+- **`install.sh` / `install.ps1`** and the uninstallers: set up `~/.opsh/` (with a virtualenv) and the `opsh` command.
+- **`.github/workflows/ci.yml`**: syntax check, version check and unit tests on Ubuntu, Windows and macOS × Python 3.9, 3.11 and 3.12, plus a ruff lint job.
+- **`.github/workflows/release.yml`**: on a `v*` tag, builds PyInstaller binaries on all 3 OSes and publishes them as a GitHub Release.
+- **`docs/`**: banner, demo image and the static landing page (deployed to [opensh.vercel.app](https://opensh.vercel.app) via `vercel.json`).
 
-## 🧑‍💻 Development
+## Testing
 
 ```bash
-git clone https://github.com/muhib-karim/OpenSH && cd OpenSH
 python -m pip install -r requirements.txt pytest
-python -m pytest -q tests      # safety-guard tests
-python opsh.py                 # run from source
+python -m pytest -q tests                        # 70 tests
+python -m py_compile opsh.py
+python opsh.py --version
+python -m pip install ruff
+ruff check --select E9,F63,F7,F82 opsh.py tests  # syntax errors / undefined names
 ```
 
-Releases: bump `__version__` in `opsh.py`, add a `CHANGELOG.md` entry, then tag `vX.Y.Z`; the release workflow builds and publishes the binaries.
+The suite needs no network access or API key. Provider HTTP calls are mocked, and config, `.env` and the home folder are redirected to a temp directory.
 
-## 🩺 Troubleshooting
+- `tests/test_safety.py`: 30 cases. Destructive commands must be flagged and everyday commands (`git push origin main`, `rmdir empty_dir`, `cat format.txt`) must not be.
+- `tests/test_core.py`: 40 cases covering version comparison, the shell-vs-English classifier (Linux and Windows), history capping and formatting, the `!help` exit key per platform, the confirmation prompt, config and `.env` round-trips, prompt contents, Groq/Gemini response parsing and 429 retry, `run_command`, and a `--help` / `--version` CLI smoke test.
 
-| Symptom | Fix |
-| :--- | :--- |
-| `Auth error - run !auth` | The key is missing or revoked; run `!auth` and paste a fresh one. |
-| `Rate limit hit` | OpenSH waits 5 s and you can retry; Groq's free tier allows about 30 requests a minute. |
-| A command needed a different shell | Prefix it with `!` to run it verbatim. |
-| Arrow-key history missing on Windows | `pip install pyreadline3`. |
+## Project structure
 
-## 🤝 Contributing
+```text
+OpenSH/
+├── opsh.py                  # the CLI (single file, stdlib only)
+├── tests/
+│   ├── test_safety.py       # destructive-command guard
+│   └── test_core.py         # classifier, history, config, prompt, providers, CLI
+├── install.sh / install.ps1 # installers (~/.opsh + PATH)
+├── uninstall.sh / uninstall.ps1
+├── requirements.txt         # only pyreadline3 on Windows (optional)
+├── docs/
+│   ├── banner.svg, demo.svg
+│   └── index.html           # landing page
+├── vercel.json              # static hosting config for docs/
+├── .github/workflows/       # ci.yml, release.yml
+├── CHANGELOG.md · CREDITS.md · LICENSE
+```
 
-Issues and PRs are welcome. Please add a test in `tests/` for anything that touches the safety guard.
+## Limitations and roadmap
 
-## 📄 License
+- The model's output is executed after a regex check, not in a sandbox. The guard lowers the risk but cannot prove a command is safe.
+- Non-destructive generated commands run without a preview pause. Use `-c` in a scratch folder if you want to experiment.
+- On Linux and macOS, commands run without a timeout so that interactive tools keep working. On Windows there is a 60 s timeout.
+- Model names (`llama-3.3-70b-versatile`, `gemini-2.0-flash`) are hard-coded. Planned (see [CHANGELOG](CHANGELOG.md)): configurable model selection and command aliases.
 
-MIT, see [LICENSE](LICENSE). Based on [nlsh](https://github.com/junaid-mahmood/nlsh) by Junaid Mahmood; see [CREDITS.md](CREDITS.md).
+## Contributing
+
+Issues and PRs are welcome. Please add a test in `tests/` for anything that touches the safety guard or the classifier.
+
+## License
+
+MIT, see [LICENSE](LICENSE). Based on [nlsh](https://github.com/junaid-mahmood/nlsh) by Junaid Mahmood; see [CREDITS.md](CREDITS.md). If OpenSH is useful to you, you can support it on [Ko-fi](https://ko-fi.com/ai_dev_2024).

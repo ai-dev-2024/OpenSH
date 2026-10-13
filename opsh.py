@@ -64,6 +64,20 @@ def get_platform_info():
 
 PLATFORM = get_platform_info()
 
+def _version_tuple(version: str) -> tuple:
+    """Turn "v1.2.3" into (1, 2, 3); non-numeric parts count as 0."""
+    parts = []
+    for part in version.strip().lstrip("v").split("."):
+        digits = "".join(ch for ch in part if ch.isdigit())
+        parts.append(int(digits) if digits else 0)
+    return tuple(parts)
+
+def is_newer_version(latest: str, current: str = __version__) -> bool:
+    """True only when latest is strictly newer than current."""
+    if not latest:
+        return False
+    return _version_tuple(latest) > _version_tuple(current)
+
 def check_for_updates():
     """Check GitHub for new version (silent, non-blocking)."""
     try:
@@ -72,10 +86,10 @@ def check_for_updates():
         with urllib.request.urlopen(req, timeout=3) as response:
             data = json.loads(response.read().decode('utf-8'))
             latest = data.get("tag_name", "").lstrip("v")
-            if latest and latest != __version__:
+            if is_newer_version(latest):
                 print(f"\033[33m📦 New version available: v{latest} (you have v{__version__})\033[0m")
                 print(f"\033[90m   Update: https://github.com/muhib-karim/OpenSH/releases/tag/v{latest}\033[0m\n")
-    except:
+    except Exception:
         pass  # Silently fail - don't block startup
 
 def exit_handler(sig, frame):
@@ -189,7 +203,7 @@ def call_groq(prompt: str, api_key: str) -> str:
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
-        "User-Agent": "OpenSH/0.2.0"
+        "User-Agent": f"OpenSH/{__version__}"
     }
     
     req = urllib.request.Request(url, data=data, headers=headers, method='POST')
@@ -222,7 +236,7 @@ def call_gemini(prompt: str, api_key: str) -> str:
         "contents": [{"parts": [{"text": prompt}]}]
     }).encode('utf-8')
     
-    headers = {"Content-Type": "application/json", "User-Agent": "OpenSH/0.2.0"}
+    headers = {"Content-Type": "application/json", "User-Agent": f"OpenSH/{__version__}"}
     req = urllib.request.Request(url, data=data, headers=headers, method='POST')
     
     max_retries = 3
@@ -269,7 +283,11 @@ def show_help():
     print("\033[36m!help\033[0m      - Show this help")
     print("\033[36m!<cmd>\033[0m     - Run command directly (bypass AI)")
     print("\033[36mexit\033[0m       - Exit OpenSH")
-    print("\033[36mCtrl+C\033[0m     - Exit OpenSH")
+    if PLATFORM["name"] == "Windows":
+        print("\033[36mCtrl+C\033[0m     - Exit OpenSH")
+    else:
+        print("\033[36mCtrl+C\033[0m     - Cancel the current line")
+        print("\033[36mCtrl+D\033[0m     - Exit OpenSH")
     print()
 
 def show_version():
@@ -344,7 +362,7 @@ def get_file_context(cwd: str) -> str:
         items = os.listdir(cwd)[:20]
         if items:
             context_parts.append(f"Files in current directory ({cwd}):\n" + "\n".join(f"  {item}" for item in items))
-    except:
+    except OSError:
         pass
     
     # Desktop listing if not already in desktop
@@ -354,7 +372,7 @@ def get_file_context(cwd: str) -> str:
             items = os.listdir(desktop_path)[:20]
             if items:
                 context_parts.append(f"Files on Desktop:\n" + "\n".join(f"  {item}" for item in items))
-        except:
+        except OSError:
             pass
     
     return "\n\n".join(context_parts) if context_parts else ""

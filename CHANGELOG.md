@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `tests/test_core.py`: 40 unit tests for the classifier, history, config/.env, prompt building, provider parsing and 429 retry (mocked), `run_command`, `!help` and a `--help`/`--version` smoke test.
+- Ruff lint job in CI (syntax errors and undefined names).
+- New README banner (`docs/banner.svg`) and a demo image (`docs/demo.svg`) of real CLI output.
+
+### Fixed
+- Update check only reports a release that is actually newer (it used to report any different version, including older ones).
+- Provider requests send the current version in `User-Agent` (was hard-coded to 0.2.0).
+- `!help` shows the correct exit key on macOS/Linux (Ctrl+D; Ctrl+C cancels the line there).
+- Bare `except:` clauses narrowed so they no longer swallow `KeyboardInterrupt`/`SystemExit`.
+
+### Changed
+- `requirements.txt` no longer lists the unused `google-genai` and `google-auth-oauthlib` packages; OpenSH only uses the standard library.
+- `CREDITS.md` filled in.
+
 ### Planned
 - Customizable AI model selection
 - Command aliases
